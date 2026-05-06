@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jeu des Paires 🔤</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+
+:root {
+  --bg: #F8F0FF;
+  --primary: #7C3AED;
+  --gold: #F59E0B;
+  --green: #10B981;
+  --red: #EF4444;
+  --shadow: 0 4px 16px rgba(0,0,0,0.09);
+  --c1:#EF4444; --c1l:#FEE2E2;
+  --c2:#3B82F6; --c2l:#DBEAFE;
+  --c3:#10B981; --c3l:#D1FAE5;
+  --c4:#F59E0B; --c4l:#FEF3C7;
+  --c5:#8B5CF6; --c5l:#EDE9FE;
+  --c6:#EC4899; --c6l:#FCE7F3;
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:'Nunito',sans-serif; background:var(--bg);
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; top:-100px; right:-100px; width:300px; height:300px;
+  background:radial-gradient(circle,rgba(124,58,237,.10),transparent 70%);
+  border-radius:50%; pointer-events:none;
+}
+body::after {
+  content:''; position:fixed; bottom:-80px; left:-80px; width:260px; height:260px;
+  background:radial-gradient(circle,rgba(245,158,11,.10),transparent 70%);
+  border-radius:50%; pointer-events:none;
+}
+
+/* Confetti */
+.cf-wrap{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden;}
+.cp{position:absolute;top:-16px;animation:cpFall linear forwards;}
+@keyframes cpFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(110vh) rotate(720deg)}}
+
+/* Header */
+header{width:100%;max-width:500px;padding:14px 18px 6px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;}
+.logo{font-weight:900;font-size:20px;color:var(--primary);}
+.hud{display:flex;gap:8px;}
+.pill{background:white;border-radius:30px;padding:5px 12px;font-weight:900;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;gap:4px;}
+.pill.ok{color:var(--green);} .pill.num{color:var(--primary);}
+
+/* Progress */
+.prog-wrap{width:100%;max-width:500px;padding:0 18px 10px;}
+.prog-track{height:8px;background:#DDD6FE;border-radius:8px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--gold));border-radius:8px;transition:width .5s ease;}
+.prog-lbl{text-align:right;font-size:11px;color:#A78BFA;font-weight:800;margin-top:3px;}
+
+/* Settings */
+.settings-bar{width:100%;max-width:500px;padding:0 18px 10px;display:flex;gap:8px;}
+.toggle-btn{flex:1;padding:8px;border:2.5px solid #DDD6FE;background:white;border-radius:12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;color:#9CA3AF;}
+.toggle-btn.active{border-color:var(--primary);background:#EDE9FE;color:var(--primary);}
+.toggle-btn:active{transform:scale(.96);}
+
+/* Main */
+main{width:100%;max-width:500px;padding:0 14px 30px;display:flex;flex-direction:column;gap:10px;}
+
+/* Round badge */
+.round-badge{text-align:center;font-weight:900;font-size:13px;color:#A78BFA;}
+
+/* Syllable hint pills */
+.syl-row{display:flex;justify-content:center;gap:8px;}
+.syl-pill{font-weight:900;font-size:12px;padding:3px 10px;border-radius:20px;letter-spacing:.5px;}
+.sp1{background:#FEE2E2;color:#B91C1C;}
+.sp2{background:#DBEAFE;color:#1D4ED8;}
+.sp3{background:#D1FAE5;color:#065F46;}
+
+/* Board */
+.board{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;}
+.col-words,.col-images{display:flex;flex-direction:column;gap:8px;}
+
+/* Word card */
+.word-card{
+  background:white;border:2.5px solid #E5E7EB;border-radius:14px;padding:0 8px;
+  text-align:center;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:clamp(13px,3.8vw,17px);color:#374151;
+  cursor:pointer;transition:all .15s;box-shadow:var(--shadow);
+  user-select:none;touch-action:manipulation;
+  height:50px;display:flex;align-items:center;justify-content:center;line-height:1.1;
+}
+.word-card:active:not(.locked){transform:scale(.94);}
+
+/* Image card */
+.img-card{
+  background:white;border:2.5px solid #E5E7EB;border-radius:14px;
+  height:50px;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(24px,7vw,30px);cursor:pointer;transition:all .15s;
+  box-shadow:var(--shadow);user-select:none;touch-action:manipulation;
+}
+.img-card:active:not(.locked){transform:scale(.94);}
+
+/* Selected */
+.word-card.selected,.img-card.selected{
+  border-color:var(--gold);background:#FEF3C7;transform:scale(1.04);
+  box-shadow:0 0 0 3px rgba(245,158,11,.25),var(--shadow);
+}
+
+/* Matched */
+.word-card.m1,.img-card.m1{background:var(--c1l);border-color:var(--c1);color:var(--c1);}
+.word-card.m2,.img-card.m2{background:var(--c2l);border-color:var(--c2);color:var(--c2);}
+.word-card.m3,.img-card.m3{background:var(--c3l);border-color:var(--c3);color:var(--c3);}
+.word-card.m4,.img-card.m4{background:var(--c4l);border-color:var(--c4);color:var(--c4);}
+.word-card.m5,.img-card.m5{background:var(--c5l);border-color:var(--c5);color:var(--c5);}
+.word-card.m6,.img-card.m6{background:var(--c6l);border-color:var(--c6);color:var(--c6);}
+.word-card.locked,.img-card.locked{cursor:default;}
+
+/* Wrong */
+.word-card.wrong,.img-card.wrong{animation:wrongShake .35s ease;background:#FEE2E2;border-color:var(--red);}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* Pop */
+@keyframes matchPop{0%{transform:scale(1)}40%{transform:scale(1.07)}70%{transform:scale(.97)}100%{transform:scale(1)}}
+.word-card.pop,.img-card.pop{animation:matchPop .38s ease;}
+
+/* Uppercase */
+.uppercase-mode .word-card{text-transform:uppercase;letter-spacing:1px;font-size:clamp(11px,3.2vw,14px);}
+
+/* Round overlay */
+.round-overlay{display:none;position:fixed;inset:0;z-index:50;background:rgba(248,240,255,.93);align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;animation:fadeIn .3s ease;}
+.round-overlay.show{display:flex;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.ov-emoji{font-size:68px;animation:bigBounce .5s ease;}
+@keyframes bigBounce{0%{transform:scale(0)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.ov-msg{font-weight:900;font-size:30px;color:var(--primary);}
+.ov-sub{font-size:14px;font-weight:800;color:#6B7280;}
+
+/* End */
+.end-screen{display:none;flex-direction:column;align-items:center;text-align:center;gap:18px;padding:30px 20px;width:100%;max-width:500px;}
+.end-screen.on{display:flex;}
+.end-trophy{font-size:76px;animation:trophyBounce 1s ease infinite alternate;}
+@keyframes trophyBounce{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-10px) rotate(5deg)}}
+.end-title{font-weight:900;font-size:34px;color:var(--primary);}
+.end-score{font-weight:900;font-size:50px;color:var(--gold);}
+.end-sub{font-size:15px;color:#6B7280;font-weight:700;}
+.end-stars{font-size:38px;letter-spacing:8px;}
+.restart-btn{background:linear-gradient(135deg,var(--primary),var(--gold));color:white;border:none;border-radius:20px;padding:16px 38px;font-family:'Nunito',sans-serif;font-weight:900;font-size:19px;cursor:pointer;box-shadow:0 6px 18px rgba(124,58,237,.30);transition:all .2s;}
+.restart-btn:active{transform:scale(.95);}
+</style>
+</head>
+<body>
+
+<div class="cf-wrap" id="cfWrap"></div>
+
+<div class="round-overlay" id="roundOverlay">
+  <div class="ov-emoji" id="ovEmoji">🌟</div>
+  <div class="ov-msg"   id="ovMsg">Parfait !</div>
+  <div class="ov-sub"   id="ovSub"></div>
+</div>
+
+<header>
+  <div class="logo">🔤 Lis bien le mot !</div>
+  <div class="hud">
+    <div class="pill ok">✅ <span id="scoreEl">0</span></div>
+    <div class="pill num">🎯 <span id="roundEl">1</span>/20</div>
+  </div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-lbl" id="progLbl">0 / 20</div>
+</div>
+
+<div class="settings-bar">
+  <button class="toggle-btn active" id="btnScript" onclick="setFont('script')">✏️ Script</button>
+  <button class="toggle-btn"        id="btnMaj"    onclick="setFont('uppercase')">🔠 Majuscules</button>
+</div>
+
+<main id="gameArea">
+  <div class="round-badge" id="roundBadge">Manche 1 sur 20</div>
+  <div class="syl-row" id="sylRow"></div>
+  <div class="board">
+    <div class="col-words"  id="colWords"></div>
+    <div class="col-images" id="colImages"></div>
+  </div>
+</main>
+
+<div class="end-screen" id="endScreen">
+  <div class="end-trophy">🏆</div>
+  <div class="end-title">Bravo !</div>
+  <div class="end-stars" id="endStars">⭐⭐⭐</div>
+  <div class="end-score"><span id="finalScore">0</span> / 20</div>
+  <div class="end-sub"   id="endSub"></div>
+  <button class="restart-btn" onclick="startGame()">🔄 Rejouer !</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────
+// DATA — 50 manches, ordre aléatoire à chaque partie
+// Règle stricte : emoji correspond exactement au mot pour un enfant de 6 ans
+// ─────────────────────────────────────────────────────────────────────
+const ALL_ROUNDS = [
+  // 1 — CA / BOU / PA
+  [{s:"ca",e:"🥕",w:"carotte"},{s:"ca",e:"🦆",w:"canard"},
+   {s:"bou",e:"🕯️",w:"bougie"},{s:"bou",e:"🧴",w:"bouteille"},
+   {s:"pa",e:"🦋",w:"papillon"},{s:"pa",e:"🥔",w:"patate"}],
+  // 2 — PO / CHA / SO
+  [{s:"po",e:"🍎",w:"pomme"},{s:"po",e:"🐠",w:"poisson"},
+   {s:"cha",e:"🏰",w:"château"},{s:"cha",e:"🎩",w:"chapeau"},
+   {s:"so",e:"☀️",w:"soleil"},{s:"so",e:"🐭",w:"souris"}],
+  // 3 — BA / TOR / PI
+  [{s:"ba",e:"🍌",w:"banane"},{s:"ba",e:"⛵",w:"bateau"},
+   {s:"tor",e:"🐢",w:"tortue"},{s:"tor",e:"🌪️",w:"tornade"},
+   {s:"pi",e:"🐧",w:"pingouin"},{s:"pi",e:"🏴‍☠️",w:"pirate"}],
+  // 4 — MA / CRO / FLO
+  [{s:"ma",e:"🏠",w:"maison"},{s:"ma",e:"🎠",w:"manège"},
+   {s:"cro",e:"🐊",w:"crocodile"},{s:"cro",e:"🥐",w:"croissant"},
+   {s:"flo",e:"❄️",w:"flocon"},{s:"flo",e:"🌸",w:"floraison"}],
+  // 5 — VO / TAM / BRO
+  [{s:"vo",e:"🚗",w:"voiture"},{s:"vo",e:"🌋",w:"volcan"},
+   {s:"tam",e:"🥁",w:"tambour"},{s:"tam",e:"🪘",w:"tamtam"},
+   {s:"bro",e:"🥦",w:"brocoli"},{s:"bro",e:"🪥",w:"brosse"}],
+  // 6 — LI / MOU / DRA
+  [{s:"li",e:"🦁",w:"lion"},{s:"li",e:"📖",w:"livre"},
+   {s:"mou",e:"🐑",w:"mouton"},{s:"mou",e:"🪰",w:"mouche"},
+   {s:"dra",e:"🐉",w:"dragon"},{s:"dra",e:"🚩",w:"drapeau"}],
+  // 7 — COU / SA / PI
+  [{s:"cou",e:"👑",w:"couronne"},{s:"cou",e:"🛋️",w:"coussin"},
+   {s:"sa",e:"🌲",w:"sapin"},{s:"sa",e:"🥗",w:"salade"},
+   {s:"pi",e:"🖌️",w:"pinceau"},{s:"pi",e:"🍕",w:"pizza"}],
+  // 8 — RE / GLA / CRA
+  [{s:"re",e:"🦊",w:"renard"},{s:"re",e:"⏰",w:"réveil"},
+   {s:"gla",e:"🍦",w:"glace"},{s:"gla",e:"⚗️",w:"glacier"},
+   {s:"cra",e:"✏️",w:"crayon"},{s:"cra",e:"🦀",w:"crabe"}],
+  // 9 — CHO / PLA / SAB
+  [{s:"cho",e:"🍫",w:"chocolat"},{s:"cho",e:"🦉",w:"chouette"},
+   {s:"pla",e:"🏖️",w:"plage"},{s:"pla",e:"🪐",w:"planète"},
+   {s:"sab",e:"👞",w:"sabot"},{s:"sab",e:"🏜️",w:"sable"}],
+  // 10 — É / FRO / TRO
+  [{s:"é",e:"🐘",w:"éléphant"},{s:"é",e:"⭐",w:"étoile"},
+   {s:"fro",e:"🧀",w:"fromage"},{s:"fro",e:"🥶",w:"froid"},
+   {s:"tro",e:"🛴",w:"trottinette"},{s:"tro",e:"🎺",w:"trompette"}],
+  // 11 — PA / GI / MAN
+  [{s:"pa",e:"🦋",w:"papillon"},{s:"pa",e:"☂️",w:"parapluie"},
+   {s:"gi",e:"🦒",w:"girafe"},{s:"gi",e:"🧥",w:"gilet"},
+   {s:"man",e:"🥭",w:"mangue"},{s:"man",e:"🧤",w:"manteau"}],
+  // 12 — CAR / PER / SOU
+  [{s:"car",e:"🎒",w:"cartable"},{s:"car",e:"📦",w:"carton"},
+   {s:"per",e:"🦜",w:"perroquet"},{s:"per",e:"💎",w:"perle"},
+   {s:"sou",e:"🐭",w:"souris"},{s:"sou",e:"🍲",w:"soupe"}],
+  // 13 — FLE / SAN / CRÊ
+  [{s:"fle",e:"🌸",w:"fleur"},{s:"fle",e:"🏹",w:"flèche"},
+   {s:"san",e:"👟",w:"sandale"},{s:"san",e:"🥪",w:"sandwich"},
+   {s:"crê",e:"🥞",w:"crêpe"},{s:"crê",e:"🐓",w:"crête"}],
+  // 14 — BON / VIO / CLA
+  [{s:"bon",e:"🍬",w:"bonbon"},{s:"bon",e:"⛄",w:"bonhomme"},
+   {s:"vio",e:"🎻",w:"violon"},{s:"vio",e:"💜",w:"violet"},
+   {s:"cla",e:"🎹",w:"clavier"},{s:"cla",e:"📯",w:"clairon"}],
+  // 15 — GRE / MUS / TAP
+  [{s:"gre",e:"🐸",w:"grenouille"},{s:"gre",e:"🍇",w:"groseille"},
+   {s:"mus",e:"🎵",w:"musique"},{s:"mus",e:"🐭",w:"museau"},
+   {s:"tap",e:"🧶",w:"tapis"},{s:"tap",e:"🦛",w:"tapir"}],
+  // 16 — CAS / PAR / TRÈ
+  [{s:"cas",e:"⛑️",w:"casque"},{s:"cas",e:"🍳",w:"casserole"},
+   {s:"par",e:"🌂",w:"parasol"},{s:"par",e:"📜",w:"parchemin"},
+   {s:"trè",e:"💰",w:"trésor"},{s:"trè",e:"🍀",w:"trèfle"}],
+  // 17 — POI / GAR / COU
+  [{s:"poi",e:"🍐",w:"poire"},{s:"poi",e:"🌶️",w:"poivron"},
+   {s:"gar",e:"👦",w:"garçon"},{s:"gar",e:"🚉",w:"gare"},
+   {s:"cou",e:"🔪",w:"couteau"},{s:"cou",e:"🎨",w:"couleur"}],
+  // 18 — CAC / SAU / BRE
+  [{s:"cac",e:"🌵",w:"cactus"},{s:"cac",e:"🍫",w:"cacao"},
+   {s:"sau",e:"🐟",w:"saumon"},{s:"sau",e:"🦗",w:"sauterelle"},
+   {s:"bre",e:"🐑",w:"brebis"},{s:"bre",e:"🥨",w:"bretzel"}],
+  // 19 — CY / SCO / POT
+  [{s:"cy",e:"🦢",w:"cygne"},{s:"cy",e:"🌀",w:"cyclone"},
+   {s:"sco",e:"🛵",w:"scooter"},{s:"sco",e:"🦂",w:"scorpion"},
+   {s:"pot",e:"🏺",w:"poterie"},{s:"pot",e:"🥘",w:"potage"}],
+  // 20 — PLA / CHA / CHO
+  [{s:"pla",e:"🍽️",w:"plateau"},{s:"pla",e:"🌱",w:"plante"},
+   {s:"cha",e:"🎵",w:"chanson"},{s:"cha",e:"🕯️",w:"chandelier"},
+   {s:"cho",e:"🍫",w:"chocolat"},{s:"cho",e:"🦉",w:"chouette"}],
+  // 21 — LA / CI / MO
+  [{s:"la",e:"🐰",w:"lapin"},{s:"la",e:"🥛",w:"lait"},
+   {s:"ci",e:"✂️",w:"ciseaux"},{s:"ci",e:"🍋",w:"citron"},
+   {s:"mo",e:"🕊️",w:"mouette"},{s:"mo",e:"⛰️",w:"montagne"}],
+  // 22 — FLO / POU / CE
+  [{s:"flo",e:"❄️",w:"flocon"},{s:"flo",e:"🌺",w:"floral"},
+   {s:"pou",e:"🐔",w:"poule"},{s:"pou",e:"🧸",w:"poupée"},
+   {s:"ce",e:"🍒",w:"cerise"},{s:"ce",e:"🦌",w:"cerf"}],
+  // 23 — TI / SAC / BOU
+  [{s:"ti",e:"🐯",w:"tigre"},{s:"ti",e:"🎯",w:"tir"},
+   {s:"sac",e:"🎒",w:"sac"},{s:"sac",e:"👜",w:"sacoche"},
+   {s:"bou",e:"🧁",w:"bouchée"},{s:"bou",e:"🔘",w:"bouton"}],
+  // 24 — FEU / NUA / SOL
+  [{s:"feu",e:"🔥",w:"feu"},{s:"feu",e:"🍂",w:"feuille"},
+   {s:"nua",e:"☁️",w:"nuage"},{s:"nua",e:"🌫️",w:"nuageux"},
+   {s:"sol",e:"🌍",w:"soldat"},{s:"sol",e:"🎵",w:"solfège"}],
+  // 25 — LA / CI / BA
+  [{s:"la",e:"🐰",w:"lapin"},{s:"la",e:"🥛",w:"lait"},
+   {s:"ci",e:"🍋",w:"citron"},{s:"ci",e:"✂️",w:"ciseaux"},
+   {s:"ba",e:"🍌",w:"banane"},{s:"ba",e:"⛵",w:"bateau"}],
+  // 26 — DAU / TOR / CHA
+  [{s:"dau",e:"🐬",w:"dauphin"},{s:"dau",e:"🦌",w:"daim"},
+   {s:"tor",e:"🔦",w:"torche"},{s:"tor",e:"🌪️",w:"tornade"},
+   {s:"cha",e:"🐱",w:"chat"},{s:"cha",e:"🎶",w:"chant"}],
+  // 27 — LOU / SER / ARC
+  [{s:"lou",e:"🐺",w:"loup"},{s:"lou",e:"🔍",w:"loupe"},
+   {s:"ser",e:"🐍",w:"serpent"},{s:"ser",e:"🔒",w:"serrure"},
+   {s:"arc",e:"🌈",w:"arc-en-ciel"},{s:"arc",e:"🏹",w:"archer"}],
+  // 28 — REN / CHE / FOR
+  [{s:"ren",e:"🦊",w:"renard"},{s:"ren",e:"🦌",w:"renne"},
+   {s:"che",e:"🐴",w:"cheval"},{s:"che",e:"🐛",w:"chenille"},
+   {s:"for",e:"🌲",w:"forêt"},{s:"for",e:"🏰",w:"forteresse"}],
+  // 29 — MAR / FOU / CAM
+  [{s:"mar",e:"🔨",w:"marteau"},{s:"mar",e:"🦫",w:"marmotte"},
+   {s:"fou",e:"⚡",w:"foudre"},{s:"fou",e:"🐜",w:"fourmi"},
+   {s:"cam",e:"📷",w:"caméra"},{s:"cam",e:"🐪",w:"camélidé"}],
+  // 30 — SAL / PON / PEI
+  [{s:"sal",e:"🥗",w:"salade"},{s:"sal",e:"🧂",w:"salière"},
+   {s:"pon",e:"🌉",w:"pont"},{s:"pon",e:"🐴",w:"poney"},
+   {s:"pei",e:"🖌️",w:"peintre"},{s:"pei",e:"🪮",w:"peigne"}],
+  // 31 — AI / MOU / CHI
+  [{s:"ai",e:"🦅",w:"aigle"},{s:"ai",e:"🪡",w:"aiguille"},
+   {s:"mou",e:"🦟",w:"moustique"},{s:"mou",e:"🐑",w:"mouton"},
+   {s:"chi",e:"🐶",w:"chien"},{s:"chi",e:"🍫",w:"chips"}],
+  // 32 — BOU / CHE / PIN
+  [{s:"bou",e:"🧴",w:"bouteille"},{s:"bou",e:"💐",w:"bouquet"},
+   {s:"che",e:"🏠",w:"cheminée"},{s:"che",e:"🐴",w:"cheval"},
+   {s:"pin",e:"🐧",w:"pingouin"},{s:"pin",e:"🖌️",w:"pinceau"}],
+  // 33 — MON / SAP / CHO
+  [{s:"mon",e:"⛰️",w:"montagne"},{s:"mon",e:"⌚",w:"montre"},
+   {s:"sa",e:"🌲",w:"sapin"},{s:"sa",e:"🥗",w:"salade"},
+   {s:"cho",e:"🦉",w:"chouette"},{s:"cho",e:"🍫",w:"chocolat"}],
+  // 34 — POU / FON / FLE
+  [{s:"pou",e:"🍗",w:"poulet"},{s:"pou",e:"🐥",w:"poussin"},
+   {s:"fon",e:"🍫",w:"fondue"},{s:"fon",e:"⛲",w:"fontaine"},
+   {s:"fle",e:"🌸",w:"fleur"},{s:"fle",e:"🏹",w:"flèche"}],
+  // 35 — CRO / SER / BON
+  [{s:"cro",e:"🐊",w:"crocodile"},{s:"cro",e:"🥐",w:"croissant"},
+   {s:"ser",e:"🐍",w:"serpent"},{s:"ser",e:"🔒",w:"serrure"},
+   {s:"bon",e:"🍬",w:"bonbon"},{s:"bon",e:"⛄",w:"bonhomme"}],
+  // 36 — TAP / LI / DRA
+  [{s:"tap",e:"🧶",w:"tapis"},{s:"tap",e:"🦛",w:"tapir"},
+   {s:"li",e:"🦁",w:"lion"},{s:"li",e:"📖",w:"livre"},
+   {s:"dra",e:"🐉",w:"dragon"},{s:"dra",e:"🚩",w:"drapeau"}],
+  // 37 — GRE / CLA / SAU
+  [{s:"gre",e:"🐸",w:"grenouille"},{s:"gre",e:"🍇",w:"groseille"},
+   {s:"cla",e:"🎹",w:"clavier"},{s:"cla",e:"📯",w:"clairon"},
+   {s:"sau",e:"🐟",w:"saumon"},{s:"sau",e:"🦗",w:"sauterelle"}],
+  // 38 — MUS / CAS / TRÈ
+  [{s:"mus",e:"🎵",w:"musique"},{s:"mus",e:"🐭",w:"museau"},
+   {s:"cas",e:"⛑️",w:"casque"},{s:"cas",e:"🍳",w:"casserole"},
+   {s:"trè",e:"💰",w:"trésor"},{s:"trè",e:"🍀",w:"trèfle"}],
+  // 39 — VIO / CAC / SCO
+  [{s:"vio",e:"🎻",w:"violon"},{s:"vio",e:"💜",w:"violet"},
+   {s:"cac",e:"🌵",w:"cactus"},{s:"cac",e:"🍫",w:"cacao"},
+   {s:"sco",e:"🛵",w:"scooter"},{s:"sco",e:"🦂",w:"scorpion"}],
+  // 40 — GI / POI / TRO
+  [{s:"gi",e:"🦒",w:"girafe"},{s:"gi",e:"🧥",w:"gilet"},
+   {s:"poi",e:"🍐",w:"poire"},{s:"poi",e:"🌶️",w:"poivron"},
+   {s:"tro",e:"🛴",w:"trottinette"},{s:"tro",e:"🎺",w:"trompette"}],
+  // 41 — MAN / CRÊ / CRA
+  [{s:"man",e:"🥭",w:"mangue"},{s:"man",e:"🧤",w:"manteau"},
+   {s:"crê",e:"🥞",w:"crêpe"},{s:"crê",e:"🐓",w:"crête"},
+   {s:"cra",e:"✏️",w:"crayon"},{s:"cra",e:"🦀",w:"crabe"}],
+  // 42 — CY / GAR / BRE
+  [{s:"cy",e:"🦢",w:"cygne"},{s:"cy",e:"🌀",w:"cyclone"},
+   {s:"gar",e:"👦",w:"garçon"},{s:"gar",e:"🚉",w:"gare"},
+   {s:"bre",e:"🐑",w:"brebis"},{s:"bre",e:"🥨",w:"bretzel"}],
+  // 43 — COU / GLA / RE
+  [{s:"cou",e:"👑",w:"couronne"},{s:"cou",e:"🛋️",w:"coussin"},
+   {s:"gla",e:"🍦",w:"glace"},{s:"gla",e:"🏔️",w:"glacier"},
+   {s:"re",e:"🦊",w:"renard"},{s:"re",e:"⏰",w:"réveil"}],
+  // 44 — MA / BOU / É
+  [{s:"ma",e:"🏠",w:"maison"},{s:"ma",e:"🎠",w:"manège"},
+   {s:"bou",e:"🕯️",w:"bougie"},{s:"bou",e:"🧁",w:"bouchée"},
+   {s:"é",e:"🐘",w:"éléphant"},{s:"é",e:"⭐",w:"étoile"}],
+  // 45 — BAL / FOR / CHE
+  [{s:"bal",e:"🎈",w:"ballon"},{s:"bal",e:"🩰",w:"ballet"},
+   {s:"for",e:"🌲",w:"forêt"},{s:"for",e:"🏰",w:"forteresse"},
+   {s:"che",e:"🐴",w:"cheval"},{s:"che",e:"🐛",w:"chenille"}],
+  // 46 — PIN / AI / SAL
+  [{s:"pin",e:"🐧",w:"pingouin"},{s:"pin",e:"🖌️",w:"pinceau"},
+   {s:"ai",e:"🦅",w:"aigle"},{s:"ai",e:"🪡",w:"aiguille"},
+   {s:"sal",e:"🥗",w:"salade"},{s:"sal",e:"🧂",w:"salière"}],
+  // 47 — PER / CAR / COU
+  [{s:"per",e:"🦜",w:"perroquet"},{s:"per",e:"💎",w:"perle"},
+   {s:"car",e:"🎒",w:"cartable"},{s:"car",e:"📦",w:"carton"},
+   {s:"cou",e:"🔪",w:"couteau"},{s:"cou",e:"🎨",w:"couleur"}],
+  // 48 — SOU / TAM / VO
+  [{s:"sou",e:"🐭",w:"souris"},{s:"sou",e:"🍲",w:"soupe"},
+   {s:"tam",e:"🥁",w:"tambour"},{s:"tam",e:"🪘",w:"tamtam"},
+   {s:"vo",e:"🚗",w:"voiture"},{s:"vo",e:"🌋",w:"volcan"}],
+  // 49 — LOU / BLA / POT
+  [{s:"lou",e:"🐺",w:"loup"},{s:"lou",e:"🔍",w:"loupe"},
+   {s:"bla",e:"🦡",w:"blaireau"},{s:"bla",e:"🔷",w:"blason"},
+   {s:"pot",e:"🏺",w:"poterie"},{s:"pot",e:"🥘",w:"potage"}],
+  // 50 — FRO / MAR / ARC
+  [{s:"fro",e:"🧀",w:"fromage"},{s:"fro",e:"🥶",w:"froid"},
+   {s:"mar",e:"🔨",w:"marteau"},{s:"mar",e:"🦫",w:"marmotte"},
+   {s:"arc",e:"🌈",w:"arc-en-ciel"},{s:"arc",e:"🏹",w:"archer"}],
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let ROUNDS=[], roundIdx=0, score=0, fontMode='script';
+let selWord=null, selImg=null, matched=0, roundPairs=[], busy=false;
+const TOTAL=50;
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function confetti(n){
+  const w=document.getElementById('cfWrap');
+  const cols=['#7C3AED','#F59E0B','#EF4444','#3B82F6','#10B981','#EC4899'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div'); el.className='cp';
+    const sz=7+Math.random()*9;
+    el.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;
+      background:${cols[Math.random()*cols.length|0]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-duration:${1.3+Math.random()*1.7}s;
+      animation-delay:${Math.random()*0.3}s;`;
+    w.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function startGame(){
+  ROUNDS = shuffle([...ALL_ROUNDS]);
+  roundIdx=0; score=0;
+  document.getElementById('scoreEl').textContent=0;
+  document.getElementById('roundEl').textContent=1;
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('progLbl').textContent='0 / '+TOTAL;
+  document.getElementById('gameArea').style.display='flex';
+  document.getElementById('endScreen').classList.remove('on');
+  renderRound();
+}
+
+function renderRound(){
+  selWord=null; selImg=null; matched=0; busy=false;
+  roundPairs=ROUNDS[roundIdx].map((p,i)=>({...p,id:i+1}));
+
+  document.getElementById('roundBadge').textContent='Manche '+(roundIdx+1)+' sur '+TOTAL;
+  document.getElementById('roundEl').textContent=roundIdx+1;
+
+  const isUp=fontMode==='uppercase';
+
+  const sylsSeen=[], sylsUniq=[];
+  roundPairs.forEach(p=>{ if(!sylsSeen.includes(p.s)){sylsSeen.push(p.s);sylsUniq.push(p.s);} });
+  const sylRow=document.getElementById('sylRow');
+  sylRow.innerHTML='';
+  sylsUniq.forEach((s,i)=>{
+    const pill=document.createElement('span');
+    pill.className='syl-pill sp'+(i+1);
+    pill.textContent=(isUp?s.toUpperCase():s)+'…';
+    sylRow.appendChild(pill);
+  });
+
+  const wordOrder =shuffle([...roundPairs]);
+  const imageOrder=shuffle([...roundPairs]);
+
+  const colW=document.getElementById('colWords');
+  const colI=document.getElementById('colImages');
+  colW.innerHTML=''; colI.innerHTML='';
+
+  wordOrder.forEach(pair=>{
+    const el=document.createElement('div');
+    el.className='word-card'+(isUp?' uppercase-mode':'');
+    el.textContent=isUp?pair.w.toUpperCase():pair.w;
+    el.dataset.id=pair.id;
+    el.dataset.w=pair.w;
+    el.onclick=()=>onWord(el);
+    colW.appendChild(el);
+  });
+
+  imageOrder.forEach(pair=>{
+    const el=document.createElement('div');
+    el.className='img-card';
+    el.textContent=pair.e;
+    el.dataset.id=pair.id;
+    el.onclick=()=>onImg(el);
+    colI.appendChild(el);
+  });
+}
+
+// ─────────────────────────────────────────────
+// SELECTION
+// ─────────────────────────────────────────────
+function onWord(el){
+  if(busy||el.classList.contains('locked')) return;
+  if(selWord){
+    if(selWord.el===el){selWord.el.classList.remove('selected');selWord=null;return;}
+    selWord.el.classList.remove('selected');
+  }
+  selWord={el,id:+el.dataset.id};
+  el.classList.add('selected');
+  tryMatch();
+}
+
+function onImg(el){
+  if(busy||el.classList.contains('locked')) return;
+  if(selImg){
+    if(selImg.el===el){selImg.el.classList.remove('selected');selImg=null;return;}
+    selImg.el.classList.remove('selected');
+  }
+  selImg={el,id:+el.dataset.id};
+  el.classList.add('selected');
+  tryMatch();
+}
+
+function tryMatch(){
+  if(!selWord||!selImg) return;
+  busy=true;
+  const w=selWord,i=selImg;
+  selWord=null; selImg=null;
+
+  if(w.id===i.id){
+    const cls='m'+w.id;
+    w.el.classList.remove('selected'); i.el.classList.remove('selected');
+    w.el.classList.add(cls,'locked','pop');
+    i.el.classList.add(cls,'locked','pop');
+    confetti(5);
+    matched++;
+    if(matched===6) setTimeout(()=>roundComplete(),480);
+    else busy=false;
+  } else {
+    w.el.classList.remove('selected'); i.el.classList.remove('selected');
+    w.el.classList.add('wrong'); i.el.classList.add('wrong');
+    setTimeout(()=>{w.el.classList.remove('wrong');i.el.classList.remove('wrong');busy=false;},420);
+  }
+}
+
+// ─────────────────────────────────────────────
+// ROUND END
+// ─────────────────────────────────────────────
+function roundComplete(){
+  score++;
+  document.getElementById('scoreEl').textContent=score;
+  confetti(18);
+
+  const isLast=roundIdx>=TOTAL-1;
+  document.getElementById('ovEmoji').textContent=isLast?'🏆':'🌟';
+  document.getElementById('ovMsg').textContent  =isLast?'Terminé !':'Parfait !';
+  document.getElementById('ovSub').textContent  =isLast
+    ?'Score final : '+score+' / '+TOTAL
+    :'Manche '+(roundIdx+1)+' réussie !';
+
+  const ov=document.getElementById('roundOverlay');
+  ov.classList.add('show');
+  setTimeout(()=>{
+    ov.classList.remove('show');
+    roundIdx++;
+    if(roundIdx>=TOTAL) endGame();
+    else{
+      document.getElementById('progFill').style.width=(roundIdx/TOTAL*100)+'%';
+      document.getElementById('progLbl').textContent=roundIdx+' / '+TOTAL;
+      renderRound();
+    }
+  }, isLast?2200:1300);
+}
+
+function endGame(){
+  document.getElementById('gameArea').style.display='none';
+  document.getElementById('progFill').style.width='100%';
+  document.getElementById('progLbl').textContent=TOTAL+' / '+TOTAL;
+  document.getElementById('endScreen').classList.add('on');
+  document.getElementById('finalScore').textContent=score;
+  const pct=score/TOTAL;
+  let stars,sub;
+  if(pct>=.9){stars='⭐⭐⭐';sub='Champion(ne) des syllabes ! Incroyable ! 🎉';}
+  else if(pct>=.7){stars='⭐⭐';sub='Super travail, tu es fort(e) ! 💪';}
+  else{stars='⭐';sub="Bien essayé ! Recommence pour t'améliorer !";}
+  document.getElementById('endStars').textContent=stars;
+  document.getElementById('endSub').textContent=sub;
+  confetti(40);
+}
+
+// ─────────────────────────────────────────────
+// FONT
+// ─────────────────────────────────────────────
+function setFont(mode){
+  fontMode=mode;
+  document.getElementById('btnScript').classList.toggle('active',mode==='script');
+  document.getElementById('btnMaj').classList.toggle('active',   mode==='uppercase');
+  const isUp=mode==='uppercase';
+  const sylsSeen=[],sylsUniq=[];
+  roundPairs.forEach(p=>{if(!sylsSeen.includes(p.s)){sylsSeen.push(p.s);sylsUniq.push(p.s);}});
+  document.querySelectorAll('.syl-pill').forEach((pill,i)=>{
+    if(sylsUniq[i]) pill.textContent=(isUp?sylsUniq[i].toUpperCase():sylsUniq[i])+'…';
+  });
+  document.querySelectorAll('.word-card').forEach(el=>{
+    const w=el.dataset.w;
+    if(w) el.textContent=isUp?w.toUpperCase():w;
+    el.classList.toggle('uppercase-mode',isUp);
+  });
+}
+
+startGame();
+</script>
+</body>
+</html>

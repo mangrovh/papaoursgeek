@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Les Jeux de Papa — Apprendre en jouant, sans pub</title>
+<meta name="description" content="Des jeux éducatifs simples, sans publicité, créés par un papa pour ses enfants. Lecture, syllabes, vocabulaire — apprendre en s'amusant vraiment.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --cream: #FAF7F2;
+  --warm: #F2EDE4;
+  --ink: #1C1A18;
+  --ink2: #4A4540;
+  --ink3: #8A8078;
+  --accent: #D4622A;
+  --accent2: #2A7D4F;
+  --accent3: #2563A8;
+  --yellow: #F0C040;
+  --border: #E0D8CC;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ── GRAIN TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  opacity: 0.025;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative; z-index: 10;
+  padding: 28px 40px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--cream);
+}
+
+.site-logo {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.3px;
+}
+.site-logo span { color: var(--accent); }
+
+.header-tag {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: var(--warm);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 80px 40px 60px;
+  text-align: center;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: clamp(38px, 6vw, 68px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-lead {
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.7;
+  color: var(--ink2);
+  max-width: 600px;
+  margin: 0 auto 48px;
+  font-weight: 300;
+}
+
+.hero-divider {
+  width: 48px;
+  height: 2px;
+  background: var(--accent);
+  margin: 0 auto 48px;
+}
+
+/* ── MANIFESTO ── */
+.manifesto {
+  position: relative; z-index: 1;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 72px 40px;
+  overflow: hidden;
+}
+
+.manifesto::before {
+  content: '❝';
+  position: absolute;
+  top: -20px; left: 30px;
+  font-size: 200px;
+  font-family: 'Lora', serif;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.manifesto-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.manifesto-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 32px;
+  display: block;
+}
+
+.manifesto p {
+  font-family: 'Lora', serif;
+  font-size: clamp(17px, 2.2vw, 22px);
+  line-height: 1.75;
+  color: rgba(250,247,242,0.88);
+  margin-bottom: 24px;
+}
+
+.manifesto p:last-child { margin-bottom: 0; }
+
+.manifesto p strong {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.manifesto-sig {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 14px;
+  color: rgba(250,247,242,0.5);
+  font-style: italic;
+}
+
+/* ── GAMES SECTION ── */
+.games-section {
+  position: relative; z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 48px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.section-title {
+  font-family: 'Lora', serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-count {
+  font-size: 13px;
+  color: var(--ink3);
+  font-weight: 500;
+}
+
+/* ── GAME CARDS ── */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.game-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  padding: 32px 28px 28px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.game-card:hover {
+  border-color: var(--card-accent, var(--accent));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+}
+.game-card:hover::before { transform: scaleX(1); }
+
+.game-card:nth-child(1) { --card-accent: var(--accent); }
+.game-card:nth-child(2) { --card-accent: var(--accent2); }
+.game-card:nth-child(3) { --card-accent: var(--accent3); }
+.game-card:nth-child(4) { --card-accent: #8B44C0; }
+.game-card:nth-child(5) { --card-accent: #C0782A; }
+
+.card-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.card-name {
+  font-family: 'Lora', serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.card-desc {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink2);
+  font-weight: 300;
+  flex: 1;
+}
+
+.card-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--card-accent, var(--accent));
+  letter-spacing: 0.3px;
+  margin-top: 4px;
+}
+
+.card-cta svg {
+  transition: transform 0.2s;
+}
+.game-card:hover .card-cta svg {
+  transform: translateX(4px);
+}
+
+/* ── PROMISE STRIP ── */
+.promise-strip {
+  position: relative; z-index: 1;
+  background: var(--warm);
+  border-top: 1.5px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
+  padding: 40px;
+}
+
+.promise-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 48px;
+  align-items: flex-start;
+}
+
+.promise-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.promise-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.promise-text strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.promise-text span {
+  font-size: 13px;
+  color: var(--ink2);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  padding: 40px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink3);
+  border-top: 1.5px solid var(--border);
+  font-weight: 300;
+}
+
+footer strong { color: var(--ink2); font-weight: 500; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero, .manifesto, .games-section, .promise-strip {
+  animation: fadeUp 0.6s ease both;
+}
+.manifesto { animation-delay: 0.1s; }
+.games-section { animation-delay: 0.2s; }
+.promise-strip { animation-delay: 0.25s; }
+
+.game-card {
+  animation: fadeUp 0.5s ease both;
+}
+.game-card:nth-child(1) { animation-delay: 0.3s; }
+.game-card:nth-child(2) { animation-delay: 0.38s; }
+.game-card:nth-child(3) { animation-delay: 0.46s; }
+.game-card:nth-child(4) { animation-delay: 0.54s; }
+.game-card:nth-child(5) { animation-delay: 0.62s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  header { padding: 20px 24px; }
+  .hero  { padding: 52px 24px 40px; }
+  .manifesto { padding: 52px 24px; }
+  .games-section { padding: 52px 24px; }
+  .promise-strip { padding: 32px 24px; }
+  footer { padding: 28px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="site-logo">Les&nbsp;Jeux&nbsp;<span>de Papa</span></a>
+  <span class="header-tag">Sans publicité · Gratuit</span>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-eyebrow">Jeux éducatifs pour enfants</span>
+  <h1>Apprendre à lire,<br><em>vraiment</em> jouer.</h1>
+  <div class="hero-divider"></div>
+  <p class="hero-lead">
+    Des jeux simples, pensés avec soin, sans publicité et sans distraction.
+    Parce qu'on peut s'amuser sur un écran tout en apprenant quelque chose de vrai.
+  </p>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="manifesto-inner">
+    <span class="manifesto-label">Pourquoi ce site</span>
+    <p>
+      Je suis papa, et comme beaucoup de parents, j'ai longtemps cherché des jeux numériques <strong>vraiment utiles</strong> pour mes enfants. Des jeux qui travaillent la lecture, les syllabes, le vocabulaire — sans qu'on ait l'impression que l'écran vide les cerveaux plutôt que de les nourrir.
+    </p>
+    <p>
+      Ce que j'ai trouvé sur internet m'a déçu. Soit c'est <strong>noyé sous les publicités</strong>, les pop-ups et les appels à l'achat. Soit c'est pédagogiquement discutable : des jeux qui ressemblent à de l'apprentissage mais qui n'entraînent finalement pas grand chose. Soit les deux à la fois.
+    </p>
+    <p>
+      Alors j'ai décidé de les faire moi-même. Ces jeux ne sont pas parfaits, mais ils sont <strong>honnêtes</strong> : pas de compte à créer, pas de données collectées, pas de progression artificielle conçue pour rendre addictif. Juste un enfant, des mots et des images.
+    </p>
+    <p>
+      Si ça peut servir à d'autres familles, tant mieux.
+    </p>
+    <p class="manifesto-sig">— Un papa qui code le soir après que les enfants sont couchés</p>
+  </div>
+</section>
+
+<!-- GAMES -->
+<section class="games-section">
+  <div class="section-header">
+    <h2 class="section-title">Les jeux</h2>
+    <span class="section-count" id="gameCount">Chargement…</span>
+  </div>
+  <div class="games-grid" id="gamesGrid">
+    <!-- Chargé dynamiquement depuis jeux.csv -->
+  </div>
+</section>
+
+<!-- PROMISE STRIP -->
+<section class="promise-strip">
+  <div class="promise-inner">
+    <div class="promise-item">
+      <span class="promise-icon">🚫</span>
+      <div class="promise-text">
+        <strong>Zéro publicité</strong>
+        <span>Aucune pub, aucun partenariat commercial. Jamais.</span>
+      </div>
+    </div>
+    <div class="promise-item">
+      <span class="promise-icon">🔒</span>
+      <div class="promise-text">
+        <strong>Aucune donnée collectée</strong>
+        <span>Pas de compte, pas de cookies, pas de tracking.</span>
+      </div>
+    </div>
+    <div class="promise-item">
+      <span class="promise-icon">📱</span>
+      <div class="promise-text">
+        <strong>Fonctionne partout</strong>
+        <span>Sur téléphone, tablette ou ordinateur, sans installation.</span>
+      </div>
+    </div>
+    <div class="promise-item">
+      <span class="promise-icon">✏️</span>
+      <div class="promise-text">
+        <strong>Vraiment éducatif</strong>
+        <span>Lecture, syllabes, vocabulaire — des compétences réelles.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Fait avec ❤️ par <strong>un papa</strong> pour ses enfants — et les vôtres.</p>
+</footer>
+
+<script>
+// ── Emojis par jeu (ordre du CSV) ──
+const EMOJIS = ['🔤', '🔍', '🧩', '🃏', '📖'];
+
+// ── Parse CSV simple ──
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    // Handle commas inside values (simple split since no quotes with commas)
+    const parts = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (parts[i] || '').trim());
+    return obj;
+  });
+}
+
+// ── Build cards ──
+async function loadGames() {
+  const grid   = document.getElementById('gamesGrid');
+  const count  = document.getElementById('gameCount');
+
+  try {
+    const res  = await fetch('jeux.csv');
+    const text = await res.text();
+    const games = parseCSV(text);
+
+    count.textContent = games.length + ' jeu' + (games.length > 1 ? 'x' : '');
+
+    games.forEach((game, i) => {
+      const a = document.createElement('a');
+      a.className = 'game-card';
+      a.href = game.lien;
+      a.innerHTML = `
+        <div class="card-emoji">${EMOJIS[i] || '🎮'}</div>
+        <div class="card-name">${game.nom}</div>
+        <div class="card-desc">${game.description}</div>
+        <div class="card-cta">
+          Jouer maintenant
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      `;
+      grid.appendChild(a);
+    });
+  } catch (e) {
+    // Fallback si le CSV n'est pas encore disponible
+    count.textContent = '';
+    grid.innerHTML = `
+      <p style="color:var(--ink3);font-size:14px;grid-column:1/-1;padding:20px 0;">
+        Les jeux se chargent depuis le fichier <code>jeux.csv</code>.<br>
+        Assurez-vous que le fichier est bien présent à la racine du site.
+      </p>`;
+  }
+}
+
+loadGames();
+</script>
+
+</body>
+</html>
