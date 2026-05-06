@@ -417,106 +417,112 @@
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────
 const ITEMS = [
-  { emoji:"🐱", label:"chat", bg:"#FFF0F5", distractors:["chien","lapin"] },
-  { emoji:"🐶", label:"chien", bg:"#FFF5E6", distractors:["chat","loup"] },
-  { emoji:"🐰", label:"lapin", bg:"#F0FFF4", distractors:["chat","souris"] },
-  { emoji:"🐻", label:"ours", bg:"#FFF8E6", distractors:["lion","tigre"] },
-  { emoji:"🦁", label:"lion", bg:"#FFFBEB", distractors:["tigre","ours"] },
-  { emoji:"🐯", label:"tigre", bg:"#FFF0E6", distractors:["lion","léopard"] },
-  { emoji:"🐸", label:"grenouille", bg:"#F0FFF8", distractors:["serpent","tortue"] },
-  { emoji:"🐢", label:"tortue", bg:"#F0FFF4", distractors:["grenouille","crabe"] },
-  { emoji:"🐠", label:"poisson", bg:"#E6F8FF", distractors:["crabe","dauphin"] },
-  { emoji:"🐬", label:"dauphin", bg:"#E6F3FF", distractors:["baleine","requin"] },
-  { emoji:"🦋", label:"papillon", bg:"#FFF0FF", distractors:["abeille","libellule"] },
-  { emoji:"🐝", label:"abeille", bg:"#FFFBE6", distractors:["guêpe","papillon"] },
-  { emoji:"🐦", label:"oiseau", bg:"#F0F8FF", distractors:["canard","poule"] },
-  { emoji:"🦆", label:"canard", bg:"#E6FFF8", distractors:["poule","oie"] },
-  { emoji:"🐔", label:"poule", bg:"#FFFAEF", distractors:["canard","coq"] },
-  { emoji:"🐸", label:"crapaud", bg:"#E6FFE6", distractors:["grenouille","lézard"] },
-  { emoji:"🦔", label:"hérisson", bg:"#FFF5E6", distractors:["souris","lapin"] },
-  { emoji:"🐿️", label:"écureuil", bg:"#FFF8E6", distractors:["lapin","hérisson"] },
-  { emoji:"🦊", label:"renard", bg:"#FFF0E6", distractors:["loup","chat"] },
-  { emoji:"🐺", label:"loup", bg:"#F5F5FF", distractors:["renard","chien"] },
-  { emoji:"🍎", label:"pomme", bg:"#FFF0F0", distractors:["poire","fraise"] },
-  { emoji:"🍊", label:"orange", bg:"#FFF5E6", distractors:["citron","pomme"] },
-  { emoji:"🍋", label:"citron", bg:"#FFFFE6", distractors:["orange","mangue"] },
-  { emoji:"🍇", label:"raisin", bg:"#F5E6FF", distractors:["fraise","cerise"] },
-  { emoji:"🍓", label:"fraise", bg:"#FFE6F0", distractors:["cerise","framboise"] },
-  { emoji:"🍒", label:"cerise", bg:"#FFE6F5", distractors:["fraise","prune"] },
-  { emoji:"🍑", label:"pêche", bg:"#FFF0E6", distractors:["abricot","mangue"] },
-  { emoji:"🍍", label:"ananas", bg:"#FFFFE6", distractors:["banane","mangue"] },
-  { emoji:"🍌", label:"banane", bg:"#FFFDE6", distractors:["ananas","mangue"] },
-  { emoji:"🥝", label:"kiwi", bg:"#E6FFE6", distractors:["concombre","poire"] },
-  { emoji:"🥕", label:"carotte", bg:"#FFF0E6", distractors:["navet","patate"] },
-  { emoji:"🥦", label:"brocoli", bg:"#E6FFE6", distractors:["chou","salade"] },
-  { emoji:"🌽", label:"maïs", bg:"#FFFDE6", distractors:["blé","navet"] },
-  { emoji:"🍅", label:"tomate", bg:"#FFE6E6", distractors:["pomme","cerise"] },
-  { emoji:"🥔", label:"patate", bg:"#FFF8E6", distractors:["navet","carotte"] },
-  { emoji:"🏠", label:"maison", bg:"#E6F0FF", distractors:["château","école"] },
-  { emoji:"🏫", label:"école", bg:"#E6E6FF", distractors:["maison","bibliothèque"] },
-  { emoji:"🚗", label:"voiture", bg:"#F0F8FF", distractors:["camion","moto"] },
-  { emoji:"🚌", label:"bus", bg:"#FFFDE6", distractors:["car","tramway"] },
-  { emoji:"🚂", label:"train", bg:"#E6F5FF", distractors:["tramway","bus"] },
-  { emoji:"✈️", label:"avion", bg:"#E6F8FF", distractors:["hélicoptère","fusée"] },
-  { emoji:"🚀", label:"fusée", bg:"#E6E6FF", distractors:["avion","satellite"] },
-  { emoji:"🚲", label:"vélo", bg:"#F0FFE6", distractors:["moto","trottinette"] },
-  { emoji:"⛵", label:"bateau", bg:"#E6F8FF", distractors:["yacht","radeau"] },
-  { emoji:"🚁", label:"hélicoptère", bg:"#E6FFFE", distractors:["avion","drone"] },
-  { emoji:"⭐", label:"étoile", bg:"#FFFDE6", distractors:["lune","soleil"] },
-  { emoji:"🌙", label:"lune", bg:"#E6E6FF", distractors:["étoile","soleil"] },
-  { emoji:"☀️", label:"soleil", bg:"#FFFDE6", distractors:["lune","étoile"] },
-  { emoji:"🌈", label:"arc-en-ciel", bg:"#FFF0FF", distractors:["nuage","soleil"] },
-  { emoji:"⛅", label:"nuage", bg:"#F0F8FF", distractors:["pluie","brouillard"] },
-  { emoji:"🌊", label:"vague", bg:"#E6F5FF", distractors:["mer","fleuve"] },
-  { emoji:"🌸", label:"fleur", bg:"#FFE6F5", distractors:["rose","tulipe"] },
-  { emoji:"🌳", label:"arbre", bg:"#E6FFE6", distractors:["fleur","forêt"] },
-  { emoji:"🍀", label:"trèfle", bg:"#E6FFE6", distractors:["herbe","fleur"] },
-  { emoji:"🍁", label:"feuille", bg:"#FFF5E6", distractors:["trèfle","herbe"] },
-  { emoji:"🌵", label:"cactus", bg:"#E6FFEE", distractors:["arbre","plante"] },
-  { emoji:"⚽", label:"ballon", bg:"#F0F8FF", distractors:["balle","football"] },
-  { emoji:"🎈", label:"ballon", bg:"#FFE6F0", distractors:["bulle","cerf-volant"] },
-  { emoji:"🎂", label:"gâteau", bg:"#FFF0FF", distractors:["tarte","biscuit"] },
-  { emoji:"🍰", label:"part de gâteau", bg:"#FFF0FF", distractors:["glace","biscuit"] },
-  { emoji:"🍦", label:"glace", bg:"#FFF5E6", distractors:["yaourt","sorbet"] },
-  { emoji:"🍫", label:"chocolat", bg:"#F5E6DF", distractors:["bonbon","biscuit"] },
-  { emoji:"🍭", label:"sucette", bg:"#FFF0FF", distractors:["bonbon","chocolat"] },
-  { emoji:"🍬", label:"bonbon", bg:"#FFE6F5", distractors:["sucette","caramel"] },
-  { emoji:"🍕", label:"pizza", bg:"#FFF5E6", distractors:["sandwich","crêpe"] },
-  { emoji:"🥪", label:"sandwich", bg:"#FFF8E6", distractors:["pizza","tartine"] },
-  { emoji:"🥞", label:"crêpe", bg:"#FFF5E6", distractors:["gaufre","galette"] },
-  { emoji:"🍳", label:"œuf", bg:"#FFFDE6", distractors:["beurre","fromage"] },
-  { emoji:"🧀", label:"fromage", bg:"#FFFDE6", distractors:["beurre","yaourt"] },
-  { emoji:"🥛", label:"lait", bg:"#F8F8FF", distractors:["yaourt","crème"] },
-  { emoji:"🍵", label:"thé", bg:"#F0FFF8", distractors:["café","tisane"] },
-  { emoji:"🧃", label:"jus", bg:"#FFF8E6", distractors:["eau","soda"] },
-  { emoji:"🎁", label:"cadeau", bg:"#FFE6F5", distractors:["boîte","surprise"] },
-  { emoji:"🎀", label:"ruban", bg:"#FFE6F5", distractors:["ficelle","nœud"] },
-  { emoji:"🎨", label:"peinture", bg:"#F5E6FF", distractors:["dessin","crayon"] },
-  { emoji:"✏️", label:"crayon", bg:"#FFFDE6", distractors:["stylo","feutre"] },
-  { emoji:"📚", label:"livres", bg:"#FFF5E6", distractors:["cahier","magazine"] },
-  { emoji:"📖", label:"livre", bg:"#E6F0FF", distractors:["cahier","journal"] },
-  { emoji:"🎵", label:"musique", bg:"#F5E6FF", distractors:["chanson","mélodie"] },
-  { emoji:"🎸", label:"guitare", bg:"#FFF5E6", distractors:["violon","piano"] },
-  { emoji:"🎹", label:"piano", bg:"#F5F5FF", distractors:["guitare","harpe"] },
-  { emoji:"🥁", label:"tambour", bg:"#FFF0E6", distractors:["trompette","flûte"] },
-  { emoji:"🎮", label:"jeu vidéo", bg:"#E6E6FF", distractors:["téléphone","tablette"] },
-  { emoji:"🧸", label:"nounours", bg:"#FFF8E6", distractors:["poupée","peluche"] },
-  { emoji:"🪀", label:"yo-yo", bg:"#FFE6F5", distractors:["toupie","balle"] },
-  { emoji:"🎠", label:"manège", bg:"#FFF0FF", distractors:["toboggan","balançoire"] },
-  { emoji:"🛝", label:"toboggan", bg:"#FFF0E6", distractors:["balançoire","manège"] },
-  { emoji:"⛄", label:"bonhomme de neige", bg:"#F0F8FF", distractors:["neige","glace"] },
-  { emoji:"🌞", label:"visage soleil", bg:"#FFFDE6", distractors:["soleil","lune"] },
-  { emoji:"🦄", label:"licorne", bg:"#FFF0FF", distractors:["cheval","dragon"] },
-  { emoji:"🐉", label:"dragon", bg:"#E6FFF8", distractors:["licorne","monstre"] },
-  { emoji:"🧜", label:"sirène", bg:"#E6F8FF", distractors:["fée","princesse"] },
-  { emoji:"🧙", label:"sorcier", bg:"#F5E6FF", distractors:["magicien","géant"] },
-  { emoji:"👑", label:"couronne", bg:"#FFFDE6", distractors:["chapeau","casque"] },
-  { emoji:"💎", label:"diamant", bg:"#E6F8FF", distractors:["rubis","trésor"] },
-  { emoji:"🔑", label:"clé", bg:"#FFF8E6", distractors:["serrure","cadenas"] },
-  { emoji:"🏖️", label:"plage", bg:"#E6F8FF", distractors:["mer","sable"] },
-  { emoji:"⛰️", label:"montagne", bg:"#E6FFE6", distractors:["colline","volcan"] },
-  { emoji:"🌋", label:"volcan", bg:"#FFE6E6", distractors:["montagne","île"] },
-  { emoji:"🏝️", label:"île", bg:"#E6FFF0", distractors:["plage","désert"] },
+  // ── Animaux ──
+  { emoji:"🐱", label:"chat",       bg:"#FFF0F5", distractors:["camion","banane"] },
+  { emoji:"🐶", label:"chien",      bg:"#FFF5E6", distractors:["pizza","vélo"] },
+  { emoji:"🐰", label:"lapin",      bg:"#F0FFF4", distractors:["voiture","soleil"] },
+  { emoji:"🐻", label:"ours",       bg:"#FFF8E6", distractors:["vélo","citron"] },
+  { emoji:"🦁", label:"lion",       bg:"#FFFBEB", distractors:["train","pomme"] },
+  { emoji:"🐯", label:"tigre",      bg:"#FFF0E6", distractors:["avion","fraise"] },
+  { emoji:"🐸", label:"grenouille", bg:"#F0FFF8", distractors:["voiture","ballon"] },
+  { emoji:"🐢", label:"tortue",     bg:"#F0FFF4", distractors:["banane","maison"] },
+  { emoji:"🐠", label:"poisson",    bg:"#E6F8FF", distractors:["vélo","gâteau"] },
+  { emoji:"🐬", label:"dauphin",    bg:"#E6F3FF", distractors:["pomme","train"] },
+  { emoji:"🦋", label:"papillon",   bg:"#FFF0FF", distractors:["voiture","citron"] },
+  { emoji:"🐝", label:"abeille",    bg:"#FFFBE6", distractors:["pizza","lune"] },
+  { emoji:"🐦", label:"oiseau",     bg:"#F0F8FF", distractors:["fraise","camion"] },
+  { emoji:"🦆", label:"canard",     bg:"#E6FFF8", distractors:["train","ananas"] },
+  { emoji:"🐔", label:"poule",      bg:"#FFFAEF", distractors:["avion","chocolat"] },
+  { emoji:"🦔", label:"hérisson",   bg:"#FFF5E6", distractors:["ballon","soleil"] },
+  { emoji:"🐿️", label:"écureuil",   bg:"#FFF8E6", distractors:["pizza","bus"] },
+  { emoji:"🦊", label:"renard",     bg:"#FFF0E6", distractors:["vélo","gâteau"] },
+  { emoji:"🐺", label:"loup",       bg:"#F5F5FF", distractors:["bateau","fraise"] },
+  // ── Fruits ──
+  { emoji:"🍎", label:"pomme",      bg:"#FFF0F0", distractors:["voiture","lapin"] },
+  { emoji:"🍊", label:"orange",     bg:"#FFF5E6", distractors:["train","maison"] },
+  { emoji:"🍋", label:"citron",     bg:"#FFFFE6", distractors:["vélo","ours"] },
+  { emoji:"🍇", label:"raisin",     bg:"#F5E6FF", distractors:["ballon","avion"] },
+  { emoji:"🍓", label:"fraise",     bg:"#FFE6F0", distractors:["camion","lune"] },
+  { emoji:"🍒", label:"cerise",     bg:"#FFE6F5", distractors:["bus","tigre"] },
+  { emoji:"🍑", label:"pêche",      bg:"#FFF0E6", distractors:["train","chien"] },
+  { emoji:"🍍", label:"ananas",     bg:"#FFFFE6", distractors:["voiture","soleil"] },
+  { emoji:"🍌", label:"banane",     bg:"#FFFDE6", distractors:["avion","chat"] },
+  { emoji:"🥝", label:"kiwi",       bg:"#E6FFE6", distractors:["bus","lune"] },
+  // ── Légumes ──
+  { emoji:"🥕", label:"carotte",    bg:"#FFF0E6", distractors:["avion","ours"] },
+  { emoji:"🥦", label:"brocoli",    bg:"#E6FFE6", distractors:["train","ballon"] },
+  { emoji:"🌽", label:"maïs",       bg:"#FFFDE6", distractors:["vélo","dauphin"] },
+  { emoji:"🍅", label:"tomate",     bg:"#FFE6E6", distractors:["bus","grenouille"] },
+  { emoji:"🥔", label:"patate",     bg:"#FFF8E6", distractors:["avion","soleil"] },
+  // ── Bâtiments ──
+  { emoji:"🏠", label:"maison",     bg:"#E6F0FF", distractors:["banane","vélo"] },
+  { emoji:"🏫", label:"école",      bg:"#E6E6FF", distractors:["citron","bateau"] },
+  { emoji:"🏥", label:"hôpital",    bg:"#E6FFF8", distractors:["pizza","train"] },
+  { emoji:"🏰", label:"château",    bg:"#F5E6FF", distractors:["fraise","avion"] },
+  // ── Véhicules ──
+  { emoji:"🚗", label:"voiture",    bg:"#F0F8FF", distractors:["pomme","lapin"] },
+  { emoji:"🚌", label:"bus",        bg:"#FFFDE6", distractors:["gâteau","ours"] },
+  { emoji:"🚂", label:"train",      bg:"#E6F5FF", distractors:["cerise","chat"] },
+  { emoji:"✈️", label:"avion",      bg:"#E6F8FF", distractors:["fraise","chien"] },
+  { emoji:"🚀", label:"fusée",      bg:"#E6E6FF", distractors:["raisin","lapin"] },
+  { emoji:"🚲", label:"vélo",       bg:"#F0FFE6", distractors:["soleil","tortue"] },
+  { emoji:"⛵", label:"bateau",     bg:"#E6F8FF", distractors:["pomme","ballon"] },
+  { emoji:"🚁", label:"hélicoptère",bg:"#E6FFFE", distractors:["citron","chat"] },
+  // ── Nature & ciel ──
+  { emoji:"⭐", label:"étoile",     bg:"#FFFDE6", distractors:["voiture","lapin"] },
+  { emoji:"🌙", label:"lune",       bg:"#E6E6FF", distractors:["train","fraise"] },
+  { emoji:"☀️", label:"soleil",     bg:"#FFFDE6", distractors:["vélo","grenouille"] },
+  { emoji:"🌈", label:"arc-en-ciel",bg:"#FFF0FF", distractors:["banane","chat"] },
+  { emoji:"⛅", label:"nuage",      bg:"#F0F8FF", distractors:["pizza","ours"] },
+  { emoji:"🌊", label:"vague",      bg:"#E6F5FF", distractors:["vélo","citron"] },
+  { emoji:"🌸", label:"fleur",      bg:"#FFE6F5", distractors:["train","renard"] },
+  { emoji:"🌳", label:"arbre",      bg:"#E6FFE6", distractors:["bus","pomme"] },
+  { emoji:"🍀", label:"trèfle",     bg:"#E6FFE6", distractors:["avion","ballon"] },
+  { emoji:"🍁", label:"feuille",    bg:"#FFF5E6", distractors:["voiture","dauphin"] },
+  { emoji:"🌵", label:"cactus",     bg:"#E6FFEE", distractors:["gâteau","lapin"] },
+  { emoji:"🌋", label:"volcan",     bg:"#FFE6E6", distractors:["citron","vélo"] },
+  { emoji:"⛰️", label:"montagne",   bg:"#E6FFE6", distractors:["fraise","bus"] },
+  { emoji:"🏖️", label:"plage",      bg:"#E6F8FF", distractors:["train","ours"] },
+  { emoji:"🏝️", label:"île",        bg:"#E6FFF0", distractors:["pizza","lune"] },
+  // ── Nourriture ──
+  { emoji:"🎂", label:"gâteau",     bg:"#FFF0FF", distractors:["voiture","lapin"] },
+  { emoji:"🍦", label:"glace",      bg:"#FFF5E6", distractors:["avion","chat"] },
+  { emoji:"🍫", label:"chocolat",   bg:"#F5E6DF", distractors:["vélo","soleil"] },
+  { emoji:"🍭", label:"sucette",    bg:"#FFF0FF", distractors:["train","grenouille"] },
+  { emoji:"🍬", label:"bonbon",     bg:"#FFE6F5", distractors:["bus","ours"] },
+  { emoji:"🍕", label:"pizza",      bg:"#FFF5E6", distractors:["citron","dauphin"] },
+  { emoji:"🥪", label:"sandwich",   bg:"#FFF8E6", distractors:["avion","lapin"] },
+  { emoji:"🥞", label:"crêpe",      bg:"#FFF5E6", distractors:["train","étoile"] },
+  { emoji:"🍳", label:"œuf",        bg:"#FFFDE6", distractors:["vélo","chat"] },
+  { emoji:"🧀", label:"fromage",    bg:"#FFFDE6", distractors:["bus","fraise"] },
+  { emoji:"🥛", label:"lait",       bg:"#F8F8FF", distractors:["voiture","grenouille"] },
+  { emoji:"🍵", label:"thé",        bg:"#F0FFF8", distractors:["camion","lapin"] },
+  { emoji:"🧃", label:"jus",        bg:"#FFF8E6", distractors:["avion","ours"] },
+  // ── Objets ──
+  { emoji:"🎁", label:"cadeau",     bg:"#FFE6F5", distractors:["train","pomme"] },
+  { emoji:"🎀", label:"ruban",      bg:"#FFE6F5", distractors:["vélo","citron"] },
+  { emoji:"🎨", label:"peinture",   bg:"#F5E6FF", distractors:["bus","fraise"] },
+  { emoji:"✏️", label:"crayon",     bg:"#FFFDE6", distractors:["avion","lapin"] },
+  { emoji:"📖", label:"livre",      bg:"#E6F0FF", distractors:["voiture","ballon"] },
+  { emoji:"🎵", label:"musique",    bg:"#F5E6FF", distractors:["train","grenouille"] },
+  { emoji:"🎸", label:"guitare",    bg:"#FFF5E6", distractors:["bus","pomme"] },
+  { emoji:"🎹", label:"piano",      bg:"#F5F5FF", distractors:["citron","dauphin"] },
+  { emoji:"🥁", label:"tambour",    bg:"#FFF0E6", distractors:["vélo","lapin"] },
+  { emoji:"🎮", label:"jeu vidéo",  bg:"#E6E6FF", distractors:["fraise","avion"] },
+  { emoji:"🧸", label:"nounours",   bg:"#FFF8E6", distractors:["train","citron"] },
+  { emoji:"🪀", label:"yo-yo",      bg:"#FFE6F5", distractors:["bus","soleil"] },
+  // ── Jeux & fantaisie ──
+  { emoji:"🎠", label:"manège",     bg:"#FFF0FF", distractors:["banane","chat"] },
+  { emoji:"🛝", label:"toboggan",   bg:"#FFF0E6", distractors:["citron","dauphin"] },
+  { emoji:"⛄", label:"bonhomme de neige", bg:"#F0F8FF", distractors:["vélo","pizza"] },
+  { emoji:"🦄", label:"licorne",    bg:"#FFF0FF", distractors:["train","fraise"] },
+  { emoji:"🐉", label:"dragon",     bg:"#E6FFF8", distractors:["bus","pomme"] },
+  { emoji:"🧜", label:"sirène",     bg:"#E6F8FF", distractors:["avion","citron"] },
+  { emoji:"🧙", label:"sorcier",    bg:"#F5E6FF", distractors:["vélo","lapin"] },
+  { emoji:"👑", label:"couronne",   bg:"#FFFDE6", distractors:["train","fraise"] },
+  { emoji:"💎", label:"diamant",    bg:"#E6F8FF", distractors:["bus","grenouille"] },
+  { emoji:"🔑", label:"clé",        bg:"#FFF8E6", distractors:["avion","ours"] },
+  { emoji:"⚽", label:"ballon",     bg:"#F0F8FF", distractors:["citron","chat"] },
 ];
 
 // ── STATE ────────────────────────────────────────────────────────────────
@@ -589,46 +595,48 @@ function renderQuestion() {
 }
 
 function handleAnswer(btn, chosen, correct) {
-  if (answered) return;
-  answered = true;
+  // Ignorer un bouton déjà marqué faux (désactivé individuellement)
+  if (btn.disabled) return;
 
   const isCorrect = chosen === correct;
   const card = document.getElementById('imageCard');
   const overlay = document.getElementById('feedbackOverlay');
-  const allBtns = document.querySelectorAll('.word-btn');
-
-  allBtns.forEach(b => b.disabled = true);
 
   if (isCorrect) {
+    answered = true;
     score++;
     document.getElementById('scoreCount').textContent = score;
+    // Désactiver tous les boutons
+    document.querySelectorAll('.word-btn').forEach(b => b.disabled = true);
     btn.classList.add('correct-answer');
     overlay.textContent = '⭐';
     overlay.classList.add('show', 'correct-bg');
     card.classList.add('correct-anim');
     launchConfetti(8);
+
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      current++;
+      if (current >= 100) {
+        showEndScreen();
+      } else {
+        renderQuestion();
+      }
+    }, 900);
+
   } else {
+    // Mauvaise réponse : marquer ce bouton en rouge et le désactiver
+    // Les autres boutons restent disponibles pour réessayer
     btn.classList.add('wrong-answer');
+    btn.disabled = true;
+    card.classList.add('wrong-anim');
     overlay.textContent = '❌';
     overlay.classList.add('show', 'wrong-bg');
-    card.classList.add('wrong-anim');
-    // Reveal correct
-    allBtns.forEach(b => {
-      if (b.textContent === correct || b.textContent.toLowerCase() === correct.toLowerCase()) {
-        b.classList.add('reveal-correct');
-      }
-    });
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      card.classList.remove('wrong-anim');
+    }, 600);
   }
-
-  setTimeout(() => {
-    overlay.classList.remove('show');
-    current++;
-    if (current >= 100) {
-      showEndScreen();
-    } else {
-      renderQuestion();
-    }
-  }, isCorrect ? 900 : 1200);
 }
 
 function showEndScreen() {
@@ -659,7 +667,6 @@ function setFont(mode) {
   fontMode = mode;
   document.getElementById('btnScript').classList.toggle('active', mode === 'script');
   document.getElementById('btnMaj').classList.toggle('active', mode === 'uppercase');
-  // Re-render words only
   if (!answered) {
     const grid = document.getElementById('wordsGrid');
     if (grid) {
