@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jeu des Mots 🌟</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap');
+
+  :root {
+    --bg: #FFF9F0;
+    --primary: #FF6B6B;
+    --secondary: #4ECDC4;
+    --accent: #FFE66D;
+    --purple: #A855F7;
+    --green: #22C55E;
+    --blue: #3B82F6;
+    --card: #ffffff;
+    --shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* Confetti */
+  .confetti-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 100; overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute; top: -20px;
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Header */
+  header {
+    width: 100%; max-width: 480px;
+    padding: 16px 20px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: 26px;
+    color: var(--primary);
+    text-shadow: 2px 2px 0 rgba(255,107,107,0.2);
+  }
+
+  .score-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .score-pill {
+    background: white;
+    border-radius: 30px;
+    padding: 6px 14px;
+    font-weight: 900;
+    font-size: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .score-pill.correct { color: var(--green); }
+  .score-pill.progress { color: var(--purple); }
+
+  /* Progress bar */
+  .progress-wrap {
+    width: 100%; max-width: 480px;
+    padding: 0 20px 12px;
+  }
+  .progress-bar {
+    height: 10px;
+    background: #E5E7EB;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--secondary), var(--purple));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+  }
+  .progress-label {
+    text-align: right;
+    font-size: 12px;
+    color: #9CA3AF;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* Settings toggle */
+  .settings-bar {
+    width: 100%; max-width: 480px;
+    padding: 0 20px 14px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    border: 3px solid #E5E7EB;
+    background: white;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #6B7280;
+  }
+  .toggle-btn.active {
+    border-color: var(--purple);
+    background: #F3E8FF;
+    color: var(--purple);
+  }
+  .toggle-btn:active { transform: scale(0.96); }
+
+  /* Game card */
+  main {
+    width: 100%; max-width: 480px;
+    padding: 0 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .image-card {
+    background: white;
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+  }
+
+  .image-card.correct-anim { animation: cardBounce 0.5s ease; }
+  .image-card.wrong-anim { animation: cardShake 0.4s ease; }
+
+  @keyframes cardBounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.04); }
+    60% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+  }
+  @keyframes cardShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  .image-emoji {
+    font-size: clamp(100px, 35vw, 150px);
+    line-height: 1;
+    user-select: none;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15));
+    transition: transform 0.3s;
+  }
+
+  .image-card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .image-emoji { position: relative; z-index: 1; }
+
+  /* Overlay for feedback */
+  .feedback-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    opacity: 0;
+    border-radius: 28px;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 2;
+  }
+  .feedback-overlay.show { opacity: 1; }
+  .feedback-overlay.correct-bg { background: rgba(34, 197, 94, 0.3); }
+  .feedback-overlay.wrong-bg { background: rgba(239, 68, 68, 0.25); }
+
+  /* Words */
+  .words-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .word-btn {
+    background: white;
+    border: 3px solid #E5E7EB;
+    border-radius: 20px;
+    padding: 16px 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(20px, 6vw, 26px);
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    text-align: center;
+    color: #374151;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .word-btn:active:not(:disabled) { transform: scale(0.96); }
+  .word-btn:disabled { cursor: default; }
+
+  .word-btn.correct-answer {
+    background: #DCFCE7;
+    border-color: var(--green);
+    color: #166534;
+    transform: scale(1.02);
+  }
+
+  .word-btn.wrong-answer {
+    background: #FEE2E2;
+    border-color: var(--primary);
+    color: #991B1B;
+    animation: wrongWiggle 0.3s ease;
+  }
+
+  .word-btn.reveal-correct {
+    background: #DCFCE7;
+    border-color: var(--green);
+    color: #166534;
+  }
+
+  @keyframes wrongWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    75% { transform: rotate(2deg); }
+  }
+
+  .word-btn .check-icon {
+    display: none;
+    margin-left: 8px;
+  }
+  .word-btn.correct-answer .check-icon { display: inline; }
+
+  /* Script font option */
+  .script-font .word-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+  }
+
+  /* Uppercase option */
+  .uppercase-mode .word-btn {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: clamp(17px, 5vw, 22px);
+  }
+
+  /* End screen */
+  .end-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+    padding: 30px 20px;
+    width: 100%; max-width: 480px;
+  }
+  .end-screen.visible { display: flex; }
+
+  .end-trophy { font-size: 80px; animation: tropheeBounce 1s ease infinite alternate; }
+  @keyframes tropheeBounce {
+    from { transform: translateY(0) rotate(-5deg); }
+    to { transform: translateY(-10px) rotate(5deg); }
+  }
+
+  .end-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: var(--primary);
+  }
+
+  .end-score {
+    font-family: 'Fredoka One', cursive;
+    font-size: 52px;
+    color: var(--purple);
+  }
+
+  .end-subtitle {
+    font-size: 16px;
+    color: #6B7280;
+    font-weight: 700;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, var(--primary), #FF8E53);
+    color: white;
+    border: none;
+    border-radius: 22px;
+    padding: 18px 40px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .restart-btn:active { transform: scale(0.95); }
+
+  /* Stars rating */
+  .stars {
+    font-size: 40px;
+    letter-spacing: 8px;
+    animation: starsReveal 0.5s ease;
+  }
+  @keyframes starsReveal {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Subtle bg decoration */
+  body::before {
+    content: '';
+    position: fixed; top: -100px; right: -100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #FFE66D33, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed; bottom: -80px; left: -80px;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, #4ECDC433, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- Header -->
+<header>
+  <div class="logo">🌟 Jeu des Mots</div>
+  <div class="score-box">
+    <div class="score-pill correct">✅ <span id="scoreCount">0</span></div>
+    <div class="score-pill progress">🎯 <span id="currentQ">1</span>/100</div>
+  </div>
+</header>
+
+<!-- Progress bar -->
+<div class="progress-wrap">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0 / 100</div>
+</div>
+
+<!-- Settings -->
+<div class="settings-bar">
+  <button class="toggle-btn active" id="btnScript" onclick="setFont('script')">✏️ Script</button>
+  <button class="toggle-btn" id="btnMaj" onclick="setFont('uppercase')">🔠 Majuscules</button>
+</div>
+
+<!-- Game -->
+<main id="gameArea">
+  <div class="image-card" id="imageCard">
+    <div class="image-card-bg" id="imageBg"></div>
+    <div class="image-emoji" id="imageEmoji"></div>
+    <div class="feedback-overlay" id="feedbackOverlay"></div>
+  </div>
+  <div class="words-grid" id="wordsGrid"></div>
+</main>
+
+<!-- End Screen -->
+<div class="end-screen" id="endScreen">
+  <div class="end-trophy">🏆</div>
+  <div class="end-title">Bravo !</div>
+  <div class="stars" id="endStars">⭐⭐⭐</div>
+  <div class="end-score"><span id="finalScore">0</span> / 100</div>
+  <div class="end-subtitle" id="endSubtitle">Tu es champion(ne) des mots !</div>
+  <button class="restart-btn" onclick="restartGame()">🔄 Rejouer !</button>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const ITEMS = [
+  { emoji:"🐱", label:"chat", bg:"#FFF0F5", distractors:["chien","lapin"] },
+  { emoji:"🐶", label:"chien", bg:"#FFF5E6", distractors:["chat","loup"] },
+  { emoji:"🐰", label:"lapin", bg:"#F0FFF4", distractors:["chat","souris"] },
+  { emoji:"🐻", label:"ours", bg:"#FFF8E6", distractors:["lion","tigre"] },
+  { emoji:"🦁", label:"lion", bg:"#FFFBEB", distractors:["tigre","ours"] },
+  { emoji:"🐯", label:"tigre", bg:"#FFF0E6", distractors:["lion","léopard"] },
+  { emoji:"🐸", label:"grenouille", bg:"#F0FFF8", distractors:["serpent","tortue"] },
+  { emoji:"🐢", label:"tortue", bg:"#F0FFF4", distractors:["grenouille","crabe"] },
+  { emoji:"🐠", label:"poisson", bg:"#E6F8FF", distractors:["crabe","dauphin"] },
+  { emoji:"🐬", label:"dauphin", bg:"#E6F3FF", distractors:["baleine","requin"] },
+  { emoji:"🦋", label:"papillon", bg:"#FFF0FF", distractors:["abeille","libellule"] },
+  { emoji:"🐝", label:"abeille", bg:"#FFFBE6", distractors:["guêpe","papillon"] },
+  { emoji:"🐦", label:"oiseau", bg:"#F0F8FF", distractors:["canard","poule"] },
+  { emoji:"🦆", label:"canard", bg:"#E6FFF8", distractors:["poule","oie"] },
+  { emoji:"🐔", label:"poule", bg:"#FFFAEF", distractors:["canard","coq"] },
+  { emoji:"🐸", label:"crapaud", bg:"#E6FFE6", distractors:["grenouille","lézard"] },
+  { emoji:"🦔", label:"hérisson", bg:"#FFF5E6", distractors:["souris","lapin"] },
+  { emoji:"🐿️", label:"écureuil", bg:"#FFF8E6", distractors:["lapin","hérisson"] },
+  { emoji:"🦊", label:"renard", bg:"#FFF0E6", distractors:["loup","chat"] },
+  { emoji:"🐺", label:"loup", bg:"#F5F5FF", distractors:["renard","chien"] },
+  { emoji:"🍎", label:"pomme", bg:"#FFF0F0", distractors:["poire","fraise"] },
+  { emoji:"🍊", label:"orange", bg:"#FFF5E6", distractors:["citron","pomme"] },
+  { emoji:"🍋", label:"citron", bg:"#FFFFE6", distractors:["orange","mangue"] },
+  { emoji:"🍇", label:"raisin", bg:"#F5E6FF", distractors:["fraise","cerise"] },
+  { emoji:"🍓", label:"fraise", bg:"#FFE6F0", distractors:["cerise","framboise"] },
+  { emoji:"🍒", label:"cerise", bg:"#FFE6F5", distractors:["fraise","prune"] },
+  { emoji:"🍑", label:"pêche", bg:"#FFF0E6", distractors:["abricot","mangue"] },
+  { emoji:"🍍", label:"ananas", bg:"#FFFFE6", distractors:["banane","mangue"] },
+  { emoji:"🍌", label:"banane", bg:"#FFFDE6", distractors:["ananas","mangue"] },
+  { emoji:"🥝", label:"kiwi", bg:"#E6FFE6", distractors:["concombre","poire"] },
+  { emoji:"🥕", label:"carotte", bg:"#FFF0E6", distractors:["navet","patate"] },
+  { emoji:"🥦", label:"brocoli", bg:"#E6FFE6", distractors:["chou","salade"] },
+  { emoji:"🌽", label:"maïs", bg:"#FFFDE6", distractors:["blé","navet"] },
+  { emoji:"🍅", label:"tomate", bg:"#FFE6E6", distractors:["pomme","cerise"] },
+  { emoji:"🥔", label:"patate", bg:"#FFF8E6", distractors:["navet","carotte"] },
+  { emoji:"🏠", label:"maison", bg:"#E6F0FF", distractors:["château","école"] },
+  { emoji:"🏫", label:"école", bg:"#E6E6FF", distractors:["maison","bibliothèque"] },
+  { emoji:"🚗", label:"voiture", bg:"#F0F8FF", distractors:["camion","moto"] },
+  { emoji:"🚌", label:"bus", bg:"#FFFDE6", distractors:["car","tramway"] },
+  { emoji:"🚂", label:"train", bg:"#E6F5FF", distractors:["tramway","bus"] },
+  { emoji:"✈️", label:"avion", bg:"#E6F8FF", distractors:["hélicoptère","fusée"] },
+  { emoji:"🚀", label:"fusée", bg:"#E6E6FF", distractors:["avion","satellite"] },
+  { emoji:"🚲", label:"vélo", bg:"#F0FFE6", distractors:["moto","trottinette"] },
+  { emoji:"⛵", label:"bateau", bg:"#E6F8FF", distractors:["yacht","radeau"] },
+  { emoji:"🚁", label:"hélicoptère", bg:"#E6FFFE", distractors:["avion","drone"] },
+  { emoji:"⭐", label:"étoile", bg:"#FFFDE6", distractors:["lune","soleil"] },
+  { emoji:"🌙", label:"lune", bg:"#E6E6FF", distractors:["étoile","soleil"] },
+  { emoji:"☀️", label:"soleil", bg:"#FFFDE6", distractors:["lune","étoile"] },
+  { emoji:"🌈", label:"arc-en-ciel", bg:"#FFF0FF", distractors:["nuage","soleil"] },
+  { emoji:"⛅", label:"nuage", bg:"#F0F8FF", distractors:["pluie","brouillard"] },
+  { emoji:"🌊", label:"vague", bg:"#E6F5FF", distractors:["mer","fleuve"] },
+  { emoji:"🌸", label:"fleur", bg:"#FFE6F5", distractors:["rose","tulipe"] },
+  { emoji:"🌳", label:"arbre", bg:"#E6FFE6", distractors:["fleur","forêt"] },
+  { emoji:"🍀", label:"trèfle", bg:"#E6FFE6", distractors:["herbe","fleur"] },
+  { emoji:"🍁", label:"feuille", bg:"#FFF5E6", distractors:["trèfle","herbe"] },
+  { emoji:"🌵", label:"cactus", bg:"#E6FFEE", distractors:["arbre","plante"] },
+  { emoji:"⚽", label:"ballon", bg:"#F0F8FF", distractors:["balle","football"] },
+  { emoji:"🎈", label:"ballon", bg:"#FFE6F0", distractors:["bulle","cerf-volant"] },
+  { emoji:"🎂", label:"gâteau", bg:"#FFF0FF", distractors:["tarte","biscuit"] },
+  { emoji:"🍰", label:"part de gâteau", bg:"#FFF0FF", distractors:["glace","biscuit"] },
+  { emoji:"🍦", label:"glace", bg:"#FFF5E6", distractors:["yaourt","sorbet"] },
+  { emoji:"🍫", label:"chocolat", bg:"#F5E6DF", distractors:["bonbon","biscuit"] },
+  { emoji:"🍭", label:"sucette", bg:"#FFF0FF", distractors:["bonbon","chocolat"] },
+  { emoji:"🍬", label:"bonbon", bg:"#FFE6F5", distractors:["sucette","caramel"] },
+  { emoji:"🍕", label:"pizza", bg:"#FFF5E6", distractors:["sandwich","crêpe"] },
+  { emoji:"🥪", label:"sandwich", bg:"#FFF8E6", distractors:["pizza","tartine"] },
+  { emoji:"🥞", label:"crêpe", bg:"#FFF5E6", distractors:["gaufre","galette"] },
+  { emoji:"🍳", label:"œuf", bg:"#FFFDE6", distractors:["beurre","fromage"] },
+  { emoji:"🧀", label:"fromage", bg:"#FFFDE6", distractors:["beurre","yaourt"] },
+  { emoji:"🥛", label:"lait", bg:"#F8F8FF", distractors:["yaourt","crème"] },
+  { emoji:"🍵", label:"thé", bg:"#F0FFF8", distractors:["café","tisane"] },
+  { emoji:"🧃", label:"jus", bg:"#FFF8E6", distractors:["eau","soda"] },
+  { emoji:"🎁", label:"cadeau", bg:"#FFE6F5", distractors:["boîte","surprise"] },
+  { emoji:"🎀", label:"ruban", bg:"#FFE6F5", distractors:["ficelle","nœud"] },
+  { emoji:"🎨", label:"peinture", bg:"#F5E6FF", distractors:["dessin","crayon"] },
+  { emoji:"✏️", label:"crayon", bg:"#FFFDE6", distractors:["stylo","feutre"] },
+  { emoji:"📚", label:"livres", bg:"#FFF5E6", distractors:["cahier","magazine"] },
+  { emoji:"📖", label:"livre", bg:"#E6F0FF", distractors:["cahier","journal"] },
+  { emoji:"🎵", label:"musique", bg:"#F5E6FF", distractors:["chanson","mélodie"] },
+  { emoji:"🎸", label:"guitare", bg:"#FFF5E6", distractors:["violon","piano"] },
+  { emoji:"🎹", label:"piano", bg:"#F5F5FF", distractors:["guitare","harpe"] },
+  { emoji:"🥁", label:"tambour", bg:"#FFF0E6", distractors:["trompette","flûte"] },
+  { emoji:"🎮", label:"jeu vidéo", bg:"#E6E6FF", distractors:["téléphone","tablette"] },
+  { emoji:"🧸", label:"nounours", bg:"#FFF8E6", distractors:["poupée","peluche"] },
+  { emoji:"🪀", label:"yo-yo", bg:"#FFE6F5", distractors:["toupie","balle"] },
+  { emoji:"🎠", label:"manège", bg:"#FFF0FF", distractors:["toboggan","balançoire"] },
+  { emoji:"🛝", label:"toboggan", bg:"#FFF0E6", distractors:["balançoire","manège"] },
+  { emoji:"⛄", label:"bonhomme de neige", bg:"#F0F8FF", distractors:["neige","glace"] },
+  { emoji:"🌞", label:"visage soleil", bg:"#FFFDE6", distractors:["soleil","lune"] },
+  { emoji:"🦄", label:"licorne", bg:"#FFF0FF", distractors:["cheval","dragon"] },
+  { emoji:"🐉", label:"dragon", bg:"#E6FFF8", distractors:["licorne","monstre"] },
+  { emoji:"🧜", label:"sirène", bg:"#E6F8FF", distractors:["fée","princesse"] },
+  { emoji:"🧙", label:"sorcier", bg:"#F5E6FF", distractors:["magicien","géant"] },
+  { emoji:"👑", label:"couronne", bg:"#FFFDE6", distractors:["chapeau","casque"] },
+  { emoji:"💎", label:"diamant", bg:"#E6F8FF", distractors:["rubis","trésor"] },
+  { emoji:"🔑", label:"clé", bg:"#FFF8E6", distractors:["serrure","cadenas"] },
+  { emoji:"🏖️", label:"plage", bg:"#E6F8FF", distractors:["mer","sable"] },
+  { emoji:"⛰️", label:"montagne", bg:"#E6FFE6", distractors:["colline","volcan"] },
+  { emoji:"🌋", label:"volcan", bg:"#FFE6E6", distractors:["montagne","île"] },
+  { emoji:"🏝️", label:"île", bg:"#E6FFF0", distractors:["plage","désert"] },
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let shuffled = [];
+let current = 0;
+let score = 0;
+let fontMode = 'script'; // 'script' | 'uppercase'
+let answered = false;
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  shuffled = shuffle(ITEMS).slice(0, 100);
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('scoreCount').textContent = 0;
+  document.getElementById('currentQ').textContent = 1;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressLabel').textContent = '0 / 100';
+  document.getElementById('gameArea').style.display = 'flex';
+  document.getElementById('endScreen').classList.remove('visible');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const item = shuffled[current];
+  const card = document.getElementById('imageCard');
+  const emoji = document.getElementById('imageEmoji');
+  const bg = document.getElementById('imageBg');
+  const overlay = document.getElementById('feedbackOverlay');
+
+  // Reset card
+  card.classList.remove('correct-anim', 'wrong-anim');
+  overlay.className = 'feedback-overlay';
+  overlay.textContent = '';
+
+  // Set image
+  emoji.textContent = item.emoji;
+  bg.style.background = item.bg;
+
+  // Build words
+  const words = shuffle([item.label, ...item.distractors]);
+  const grid = document.getElementById('wordsGrid');
+  grid.innerHTML = '';
+  grid.className = 'words-grid' + (fontMode === 'uppercase' ? ' uppercase-mode' : ' script-font');
+
+  words.forEach(word => {
+    const btn = document.createElement('button');
+    btn.className = 'word-btn';
+    btn.textContent = word;
+    btn.onclick = () => handleAnswer(btn, word, item.label);
+    grid.appendChild(btn);
+  });
+
+  // Update counter
+  document.getElementById('currentQ').textContent = current + 1;
+  const pct = (current / 100) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = current + ' / 100';
+}
+
+function handleAnswer(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+
+  const isCorrect = chosen === correct;
+  const card = document.getElementById('imageCard');
+  const overlay = document.getElementById('feedbackOverlay');
+  const allBtns = document.querySelectorAll('.word-btn');
+
+  allBtns.forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    score++;
+    document.getElementById('scoreCount').textContent = score;
+    btn.classList.add('correct-answer');
+    overlay.textContent = '⭐';
+    overlay.classList.add('show', 'correct-bg');
+    card.classList.add('correct-anim');
+    launchConfetti(8);
+  } else {
+    btn.classList.add('wrong-answer');
+    overlay.textContent = '❌';
+    overlay.classList.add('show', 'wrong-bg');
+    card.classList.add('wrong-anim');
+    // Reveal correct
+    allBtns.forEach(b => {
+      if (b.textContent === correct || b.textContent.toLowerCase() === correct.toLowerCase()) {
+        b.classList.add('reveal-correct');
+      }
+    });
+  }
+
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    current++;
+    if (current >= 100) {
+      showEndScreen();
+    } else {
+      renderQuestion();
+    }
+  }, isCorrect ? 900 : 1200);
+}
+
+function showEndScreen() {
+  document.getElementById('gameArea').style.display = 'none';
+  const pct = (current / 100) * 100;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = '100 / 100';
+  
+  const end = document.getElementById('endScreen');
+  end.classList.add('visible');
+  document.getElementById('finalScore').textContent = score;
+
+  let stars, subtitle;
+  if (score >= 90) { stars = '⭐⭐⭐'; subtitle = 'Tu es un(e) champion(ne) des mots ! 🎉'; }
+  else if (score >= 70) { stars = '⭐⭐'; subtitle = 'Super travail, continue comme ça ! 💪'; }
+  else { stars = '⭐'; subtitle = 'Bien essayé, recommence pour t\'améliorer !'; }
+
+  document.getElementById('endStars').textContent = stars;
+  document.getElementById('endSubtitle').textContent = subtitle;
+  launchConfetti(30);
+}
+
+function restartGame() {
+  startGame();
+}
+
+function setFont(mode) {
+  fontMode = mode;
+  document.getElementById('btnScript').classList.toggle('active', mode === 'script');
+  document.getElementById('btnMaj').classList.toggle('active', mode === 'uppercase');
+  // Re-render words only
+  if (!answered) {
+    const grid = document.getElementById('wordsGrid');
+    if (grid) {
+      grid.className = 'words-grid' + (fontMode === 'uppercase' ? ' uppercase-mode' : ' script-font');
+    }
+  }
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────
+function launchConfetti(count) {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#FF6B6B','#FFE66D','#4ECDC4','#A855F7','#22C55E','#3B82F6','#FF8E53'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (8 + Math.random() * 8) + 'px';
+    el.style.height = (8 + Math.random() * 8) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    container.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ── START ─────────────────────────────────────────────────────────────────
+startGame();
+</script>
+</body>
+</html>

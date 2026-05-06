@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jeu des Devinettes 🔍</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@700;800;900&display=swap');
+
+:root {
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --surface2: #263348;
+  --border: #334155;
+  --accent1: #38BDF8;
+  --accent2: #FB923C;
+  --accent3: #A78BFA;
+  --gold: #FBBF24;
+  --green: #4ADE80;
+  --red: #F87171;
+  --text: #F1F5F9;
+  --muted: #94A3B8;
+  --glow1: rgba(56,189,248,0.3);
+  --glow2: rgba(251,146,60,0.3);
+  --glow3: rgba(167,139,250,0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Baloo 2', cursive;
+  overflow-x: hidden;
+}
+
+/* ── Background stars ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 30% 55%, rgba(255,255,255,0.2) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Confetti ── */
+.confetti-container {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 999; overflow: hidden;
+}
+.confetti-piece {
+  position: absolute; top: -20px;
+  animation: cfFall linear forwards;
+}
+@keyframes cfFall {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; }
+}
+
+/* ── Layout ── */
+.app {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 40px;
+}
+
+/* ── Header ── */
+header {
+  width: 100%; max-width: 500px;
+  padding: 18px 20px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 900;
+  font-size: 22px;
+  background: linear-gradient(135deg, var(--accent1), var(--accent3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hud {
+  display: flex; gap: 8px;
+}
+
+.hud-pill {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex; align-items: center; gap: 4px;
+}
+.hud-pill.ok  { color: var(--green); border-color: rgba(74,222,128,0.3); }
+.hud-pill.num { color: var(--accent3); border-color: rgba(167,139,250,0.3); }
+
+/* ── Progress ── */
+.prog-wrap {
+  width: 100%; max-width: 500px;
+  padding: 0 20px 16px;
+}
+.prog-track {
+  height: 8px;
+  background: var(--surface2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent1), var(--accent3));
+  border-radius: 8px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 10px var(--glow1);
+}
+.prog-lbl {
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ── Question ── */
+main {
+  width: 100%; max-width: 500px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.question-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  padding: 22px 22px 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.question-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+}
+
+.q-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent1);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.q-label::before { content: '🔍'; font-size: 14px; }
+
+.question-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(19px, 5.2vw, 24px);
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+/* ── Font modes ── */
+body.mode-uppercase .question-text {
+  text-transform: uppercase;
+  font-size: clamp(15px, 4.2vw, 20px);
+  letter-spacing: 1.5px;
+  font-weight: 900;
+}
+body.mode-uppercase .emoji-label {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 10px;
+}
+
+/* ── Settings bar ── */
+.settings-bar {
+  width: 100%; max-width: 500px;
+  padding: 0 20px 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 9px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  border-radius: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+}
+.toggle-btn.active {
+  border-color: var(--accent1);
+  background: rgba(56,189,248,0.12);
+  color: var(--accent1);
+}
+.toggle-btn:active { transform: scale(0.96); }
+
+/* ── Images grid ── */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.img-btn {
+  background: var(--surface);
+  border: 2.5px solid var(--border);
+  border-radius: 20px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.img-btn:active:not(:disabled) { transform: scale(0.93); }
+.img-btn:disabled { cursor: default; }
+
+/* hover on desktop */
+@media (hover: hover) {
+  .img-btn:hover:not(:disabled) {
+    border-color: var(--accent1);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px var(--glow1);
+  }
+}
+
+.img-btn .emoji {
+  font-size: clamp(38px, 12vw, 56px);
+  line-height: 1;
+  user-select: none;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+.img-btn .emoji-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
+  text-align: center;
+  padding: 0 4px;
+}
+
+/* Feedback states */
+.img-btn.correct {
+  border-color: var(--green);
+  background: rgba(74,222,128,0.12);
+  box-shadow: 0 0 24px rgba(74,222,128,0.4);
+  animation: correctPop 0.45s ease;
+}
+.img-btn.correct .emoji-label { color: var(--green); }
+
+.img-btn.wrong {
+  border-color: var(--red);
+  background: rgba(248,113,113,0.1);
+  animation: wrongShake 0.35s ease;
+}
+.img-btn.wrong .emoji-label { color: var(--red); }
+
+.img-btn.reveal {
+  border-color: var(--green);
+  background: rgba(74,222,128,0.1);
+  box-shadow: 0 0 16px rgba(74,222,128,0.25);
+}
+.img-btn.reveal .emoji-label { color: var(--green); }
+
+@keyframes correctPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+@keyframes wrongShake {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-4deg); }
+  40%       { transform: rotate(4deg); }
+  60%       { transform: rotate(-3deg); }
+  80%       { transform: rotate(3deg); }
+}
+
+/* Badge overlay on image card */
+.img-btn .badge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 20px;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s;
+}
+.img-btn.correct .badge, .img-btn.reveal .badge { opacity: 1; transform: scale(1); }
+.img-btn.correct .badge::before { content: '⭐'; }
+.img-btn.reveal  .badge::before { content: '✅'; }
+.img-btn.wrong   .badge { opacity: 1; transform: scale(1); }
+.img-btn.wrong   .badge::before { content: '❌'; }
+
+/* ── End screen ── */
+.end-screen {
+  display: none;
+  width: 100%; max-width: 500px;
+  padding: 30px 24px;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.end-screen.on { display: flex; }
+
+.end-planet { font-size: 72px; animation: planetFloat 2s ease-in-out infinite alternate; }
+@keyframes planetFloat {
+  from { transform: translateY(0) rotate(-5deg); }
+  to   { transform: translateY(-14px) rotate(5deg); }
+}
+
+.end-title {
+  font-weight: 900;
+  font-size: 38px;
+  background: linear-gradient(135deg, var(--gold), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.end-stars { font-size: 44px; letter-spacing: 10px; }
+
+.end-score {
+  font-size: 58px;
+  font-weight: 900;
+  color: var(--accent1);
+  text-shadow: 0 0 30px var(--glow1);
+}
+
+.end-msg {
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.end-bar {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-around;
+}
+.end-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.end-stat-val { font-size: 28px; font-weight: 900; }
+.end-stat-lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+.replay-btn {
+  background: linear-gradient(135deg, var(--accent1), var(--accent3));
+  color: #0F172A;
+  border: none;
+  border-radius: 20px;
+  padding: 16px 42px;
+  font-family: 'Baloo 2', cursive;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 24px var(--glow1);
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.replay-btn:active { transform: scale(0.95); }
+
+/* ── Transition animation ── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide-in { animation: slideIn 0.35s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="confetti-container" id="cf"></div>
+
+<div class="app">
+  <!-- Header -->
+  <header>
+    <div class="logo">🔍 Devine l'image !</div>
+    <div class="hud">
+      <div class="hud-pill ok">⭐ <span id="scoreEl">0</span></div>
+      <div class="hud-pill num"><span id="qEl">1</span>/100</div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-lbl" id="progLbl">0 / 100</div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-bar">
+    <button class="toggle-btn active" id="btnScript" onclick="setFont('script')">✏️ Script</button>
+    <button class="toggle-btn" id="btnMaj" onclick="setFont('uppercase')">🔠 Majuscules</button>
+  </div>
+
+  <!-- Game -->
+  <main id="gameArea">
+    <div class="question-card slide-in" id="qCard">
+      <div class="q-label">Trouve l'image</div>
+      <div class="question-text" id="qText"></div>
+    </div>
+    <div class="images-grid slide-in" id="imgGrid"></div>
+  </main>
+
+  <!-- End -->
+  <div class="end-screen" id="endScreen">
+    <div class="end-planet">🪐</div>
+    <div class="end-title">Terminé !</div>
+    <div class="end-stars" id="endStars">⭐⭐⭐</div>
+    <div class="end-score"><span id="finalScore">0</span><span style="font-size:24px;color:var(--muted)">/100</span></div>
+    <div class="end-bar">
+      <div class="end-stat">
+        <div class="end-stat-val" id="statOk" style="color:var(--green)">0</div>
+        <div class="end-stat-lbl">✅ Bonne</div>
+      </div>
+      <div class="end-stat">
+        <div class="end-stat-val" id="statWrong" style="color:var(--red)">0</div>
+        <div class="end-stat-lbl">❌ Erreur</div>
+      </div>
+      <div class="end-stat">
+        <div class="end-stat-val" id="statPct" style="color:var(--gold)">0%</div>
+        <div class="end-stat-lbl">🎯 Score</div>
+      </div>
+    </div>
+    <div class="end-msg" id="endMsg"></div>
+    <button class="replay-btn" onclick="startGame()">🚀 Rejouer !</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA  –  100 questions : phrase + bonne image + 2 distracteurs
+// ─────────────────────────────────────────────
+const ALL = [
+  // Animaux
+  { q:"Je ronronne et je chasse les souris.", answer:{e:"🐱",l:"chat"},    d:[{e:"🐶",l:"chien"},{e:"🐰",l:"lapin"}] },
+  { q:"J'aboie et je remue la queue.", answer:{e:"🐶",l:"chien"},          d:[{e:"🐱",l:"chat"},{e:"🐺",l:"loup"}] },
+  { q:"Je saute très haut et j'ai de longues oreilles.", answer:{e:"🐰",l:"lapin"}, d:[{e:"🐿️",l:"écureuil"},{e:"🐭",l:"souris"}] },
+  { q:"Je suis grand, brun et j'hiberne en hiver.", answer:{e:"🐻",l:"ours"}, d:[{e:"🦁",l:"lion"},{e:"🐗",l:"sanglier"}] },
+  { q:"Je vis dans la savane et j'ai une grande crinière.", answer:{e:"🦁",l:"lion"}, d:[{e:"🐯",l:"tigre"},{e:"🐻",l:"ours"}] },
+  { q:"J'ai des rayures noires et oranges.", answer:{e:"🐯",l:"tigre"},    d:[{e:"🦓",l:"zèbre"},{e:"🦁",l:"lion"}] },
+  { q:"Je vis dans la mare et je coasse fort.", answer:{e:"🐸",l:"grenouille"}, d:[{e:"🐢",l:"tortue"},{e:"🦎",l:"lézard"}] },
+  { q:"Je porte ma maison sur mon dos.", answer:{e:"🐢",l:"tortue"},       d:[{e:"🐸",l:"grenouille"},{e:"🦀",l:"crabe"}] },
+  { q:"Je nage dans la mer et j'ai des écailles.", answer:{e:"🐠",l:"poisson"}, d:[{e:"🦈",l:"requin"},{e:"🐙",l:"pieuvre"}] },
+  { q:"Je suis intelligent et je joue dans l'eau.", answer:{e:"🐬",l:"dauphin"}, d:[{e:"🐋",l:"baleine"},{e:"🦭",l:"phoque"}] },
+  { q:"Je vole de fleur en fleur et j'ai de belles ailes colorées.", answer:{e:"🦋",l:"papillon"}, d:[{e:"🐝",l:"abeille"},{e:"🐛",l:"chenille"}] },
+  { q:"Je fais du miel et je vis dans une ruche.", answer:{e:"🐝",l:"abeille"}, d:[{e:"🦋",l:"papillon"},{e:"🐞",l:"coccinelle"}] },
+  { q:"Je chante le matin et je peux voler.", answer:{e:"🐦",l:"oiseau"},  d:[{e:"🦆",l:"canard"},{e:"🐔",l:"poule"}] },
+  { q:"Je dis « coin coin » et j'aime les étangs.", answer:{e:"🦆",l:"canard"}, d:[{e:"🐦",l:"oiseau"},{e:"🦢",l:"cygne"}] },
+  { q:"Je pond des œufs et je dis « cot cot ».", answer:{e:"🐔",l:"poule"}, d:[{e:"🦆",l:"canard"},{e:"🐦",l:"oiseau"}] },
+  { q:"J'ai des piques sur le dos et je mange des limaces.", answer:{e:"🦔",l:"hérisson"}, d:[{e:"🐿️",l:"écureuil"},{e:"🐭",l:"souris"}] },
+  { q:"Je grimpe aux arbres et je mange des noisettes.", answer:{e:"🐿️",l:"écureuil"}, d:[{e:"🦔",l:"hérisson"},{e:"🐰",l:"lapin"}] },
+  { q:"Je suis roux et rusé comme dans les histoires.", answer:{e:"🦊",l:"renard"}, d:[{e:"🐺",l:"loup"},{e:"🐱",l:"chat"}] },
+  { q:"Je hurle à la lune et je vis en meute.", answer:{e:"🐺",l:"loup"},  d:[{e:"🦊",l:"renard"},{e:"🐶",l:"chien"}] },
+  { q:"Je suis le plus grand animal de la forêt avec mes bois.", answer:{e:"🦌",l:"cerf"}, d:[{e:"🐴",l:"cheval"},{e:"🦙",l:"lama"}] },
+
+  // Fruits & légumes
+  { q:"Je suis rouge, ronde et je pousse sur un pommier.", answer:{e:"🍎",l:"pomme"}, d:[{e:"🍊",l:"orange"},{e:"🍒",l:"cerise"}] },
+  { q:"Je suis orange et on me presse pour faire du jus.", answer:{e:"🍊",l:"orange"}, d:[{e:"🍋",l:"citron"},{e:"🍑",l:"pêche"}] },
+  { q:"Je suis jaune et très acide !", answer:{e:"🍋",l:"citron"},         d:[{e:"🍊",l:"orange"},{e:"🍍",l:"ananas"}] },
+  { q:"Je suis violet, en grappes et on me mange en automne.", answer:{e:"🍇",l:"raisin"}, d:[{e:"🫐",l:"myrtille"},{e:"🍒",l:"cerise"}] },
+  { q:"Je suis rouge, petite et très sucrée au printemps.", answer:{e:"🍓",l:"fraise"}, d:[{e:"🍒",l:"cerise"},{e:"🍇",l:"raisin"}] },
+  { q:"Je suis rouge par deux et j'ai une tige avec une feuille.", answer:{e:"🍒",l:"cerise"}, d:[{e:"🍓",l:"fraise"},{e:"🍒",l:"prune"}] },
+  { q:"Je suis jaune, long et les singes m'adorent.", answer:{e:"🍌",l:"banane"}, d:[{e:"🍍",l:"ananas"},{e:"🥭",l:"mangue"}] },
+  { q:"J'ai des épines jaunes partout et je viens des pays chauds.", answer:{e:"🍍",l:"ananas"}, d:[{e:"🥭",l:"mangue"},{e:"🍌",l:"banane"}] },
+  { q:"Je suis orange à l'intérieur et j'ai une peau verte et duveteuse.", answer:{e:"🥝",l:"kiwi"}, d:[{e:"🥦",l:"brocoli"},{e:"🍑",l:"pêche"}] },
+  { q:"Je suis orange et allongé, les lapins m'adorent.", answer:{e:"🥕",l:"carotte"}, d:[{e:"🌽",l:"maïs"},{e:"🥔",l:"patate"}] },
+  { q:"Je suis vert, en forme d'arbre et je pousse dans les jardins.", answer:{e:"🥦",l:"brocoli"}, d:[{e:"🥬",l:"salade"},{e:"🌿",l:"herbe"}] },
+  { q:"Je suis jaune avec des grains en rangées bien droites.", answer:{e:"🌽",l:"maïs"},  d:[{e:"🥦",l:"brocoli"},{e:"🥕",l:"carotte"}] },
+  { q:"Je suis rouge et on me met dans la sauce des pâtes.", answer:{e:"🍅",l:"tomate"}, d:[{e:"🍎",l:"pomme"},{e:"🌶️",l:"piment"}] },
+  { q:"Je pousse sous terre et on me fait frire en chips.", answer:{e:"🥔",l:"patate"},  d:[{e:"🥕",l:"carotte"},{e:"🧅",l:"oignon"}] },
+  { q:"Je suis vert, long et croquant dans les salades.", answer:{e:"🥒",l:"concombre"}, d:[{e:"🥦",l:"brocoli"},{e:"🥕",l:"carotte"}] },
+
+  // Nourriture
+  { q:"On me mange à mon anniversaire avec des bougies dessus.", answer:{e:"🎂",l:"gâteau"}, d:[{e:"🍰",l:"tarte"},{e:"🧁",l:"cupcake"}] },
+  { q:"Je suis froide, sucrée et montée sur un cône.", answer:{e:"🍦",l:"glace"},   d:[{e:"🍧",l:"sorbet"},{e:"🍭",l:"sucette"}] },
+  { q:"Je suis un disque de fromage et de sauce avec de la pâte.", answer:{e:"🍕",l:"pizza"}, d:[{e:"🥙",l:"kebab"},{e:"🧆",l:"falafels"}] },
+  { q:"Je suis ronde, sucrée et on me fait sauter à la Chandeleur.", answer:{e:"🥞",l:"crêpe"}, d:[{e:"🧇",l:"gaufre"},{e:"🍩",l:"beignet"}] },
+  { q:"On me fait cuire dans une poêle le matin pour le petit-déjeuner.", answer:{e:"🍳",l:"œuf"},  d:[{e:"🧀",l:"fromage"},{e:"🥓",l:"bacon"}] },
+  { q:"Je suis blanc, liquide et je viens de la vache.", answer:{e:"🥛",l:"lait"},   d:[{e:"🧃",l:"jus"},{e:"💧",l:"eau"}] },
+  { q:"Je suis sucré, souvent brun et on me mange à Pâques.", answer:{e:"🍫",l:"chocolat"}, d:[{e:"🍬",l:"bonbon"},{e:"🍭",l:"sucette"}] },
+  { q:"Je suis un bonbon rond au bout d'un bâton.", answer:{e:"🍭",l:"sucette"},     d:[{e:"🍬",l:"bonbon"},{e:"🍫",l:"chocolat"}] },
+  { q:"Je suis deux tranches de pain avec quelque chose au milieu.", answer:{e:"🥪",l:"sandwich"}, d:[{e:"🌯",l:"wrap"},{e:"🥐",l:"croissant"}] },
+  { q:"Je suis croustillant, salé et on me grignotent en regardant des films.", answer:{e:"🍿",l:"popcorn"}, d:[{e:"🥨",l:"bretzel"},{e:"🍪",l:"biscuit"}] },
+
+  // Objets du quotidien
+  { q:"On m'utilise pour dessiner des traits bien droits.", answer:{e:"✏️",l:"crayon"}, d:[{e:"🖊️",l:"stylo"},{e:"🖌️",l:"pinceau"}] },
+  { q:"Je contiens plein d'histoires et on me lit avant de dormir.", answer:{e:"📖",l:"livre"}, d:[{e:"📓",l:"cahier"},{e:"📰",l:"journal"}] },
+  { q:"On me pose sur la tête pour ne pas avoir froid.", answer:{e:"🎩",l:"chapeau"}, d:[{e:"🧣",l:"écharpe"},{e:"🧤",l:"gants"}] },
+  { q:"Je tinte quand il est l'heure de se réveiller.", answer:{e:"⏰",l:"réveil"},   d:[{e:"🕰️",l:"horloge"},{e:"📱",l:"téléphone"}] },
+  { q:"Je donne de la lumière quand il fait nuit.", answer:{e:"💡",l:"lampe"},         d:[{e:"🕯️",l:"bougie"},{e:"🔦",l:"torche"}] },
+  { q:"On me brosse deux fois par jour pour garder les dents propres.", answer:{e:"🪥",l:"brosse à dents"}, d:[{e:"🧴",l:"shampoing"},{e:"🧼",l:"savon"}] },
+  { q:"On me remplit d'eau chaude pour se laver.", answer:{e:"🛁",l:"baignoire"},     d:[{e:"🚿",l:"douche"},{e:"🪣",l:"seau"}] },
+  { q:"Je protège de la pluie et je s'ouvre comme une fleur.", answer:{e:"☂️",l:"parapluie"}, d:[{e:"🎪",l:"chapiteau"},{e:"⛺",l:"tente"}] },
+  { q:"Je garde les secrets et on m'écrit tous les jours.", answer:{e:"📔",l:"journal intime"}, d:[{e:"📚",l:"livres"},{e:"✉️",l:"lettre"}] },
+  { q:"Je tourne pour mélanger les couleurs.", answer:{e:"🎨",l:"palette de peinture"}, d:[{e:"🖌️",l:"pinceau"},{e:"✂️",l:"ciseaux"}] },
+
+  // Nature & ciel
+  { q:"Je brille dans le ciel la nuit avec plein de copines.", answer:{e:"⭐",l:"étoile"},   d:[{e:"🌙",l:"lune"},{e:"💫",l:"éclat"}] },
+  { q:"Je suis ronde, je change de forme et j'éclaire la nuit.", answer:{e:"🌙",l:"lune"},   d:[{e:"⭐",l:"étoile"},{e:"☀️",l:"soleil"}] },
+  { q:"Je réchauffe la Terre et je brille dans le ciel.", answer:{e:"☀️",l:"soleil"},         d:[{e:"🌙",l:"lune"},{e:"🌟",l:"étoile filante"}] },
+  { q:"J'apparais après la pluie avec 7 couleurs magnifiques.", answer:{e:"🌈",l:"arc-en-ciel"}, d:[{e:"⛅",l:"nuage"},{e:"🌤️",l:"éclaircie"}] },
+  { q:"Je suis blanc et je flotte dans le ciel.", answer:{e:"☁️",l:"nuage"},             d:[{e:"💨",l:"vent"},{e:"🌫️",l:"brouillard"}] },
+  { q:"Je suis une grande étendue d'eau salée.", answer:{e:"🌊",l:"mer"},                d:[{e:"🏔️",l:"montagne"},{e:"🏜️",l:"désert"}] },
+  { q:"Je suis grand, vert et je donne de l'ombre en été.", answer:{e:"🌳",l:"arbre"},   d:[{e:"🌵",l:"cactus"},{e:"🌿",l:"plante"}] },
+  { q:"Je vis dans le désert et je n'ai pas besoin d'eau.", answer:{e:"🌵",l:"cactus"},  d:[{e:"🌳",l:"arbre"},{e:"🌾",l:"blé"}] },
+  { q:"Je crache du feu et de la lave.", answer:{e:"🌋",l:"volcan"},                     d:[{e:"⛰️",l:"montagne"},{e:"🏔️",l:"sommet enneigé"}] },
+  { q:"Je suis entouré d'eau de tous les côtés.", answer:{e:"🏝️",l:"île"},               d:[{e:"🏖️",l:"plage"},{e:"🌋",l:"volcan"}] },
+
+  // Véhicules & transports
+  { q:"Je roule sur les routes et je transporte des familles.", answer:{e:"🚗",l:"voiture"}, d:[{e:"🚌",l:"bus"},{e:"🚚",l:"camion"}] },
+  { q:"Je roule sur des rails et siffle dans les gares.", answer:{e:"🚂",l:"train"},     d:[{e:"🚌",l:"bus"},{e:"🚈",l:"tramway"}] },
+  { q:"Je vole très haut dans le ciel avec les passagers.", answer:{e:"✈️",l:"avion"},   d:[{e:"🚀",l:"fusée"},{e:"🚁",l:"hélicoptère"}] },
+  { q:"Je vole dans l'espace et je pars très vite !", answer:{e:"🚀",l:"fusée"},         d:[{e:"✈️",l:"avion"},{e:"🛸",l:"soucoupe"}] },
+  { q:"J'ai deux roues et on me pédale pour avancer.", answer:{e:"🚲",l:"vélo"},         d:[{e:"🛵",l:"scooter"},{e:"🛹",l:"skateboard"}] },
+  { q:"Je navigue sur l'eau avec mes voiles blanches.", answer:{e:"⛵",l:"voilier"},      d:[{e:"🚢",l:"bateau"},{e:"🛥️",l:"hors-bord"}] },
+  { q:"Je tourne mes pales pour décoller sans piste.", answer:{e:"🚁",l:"hélicoptère"}, d:[{e:"✈️",l:"avion"},{e:"🚀",l:"fusée"}] },
+  { q:"Je transporte beaucoup de personnes en ville.", answer:{e:"🚌",l:"bus"},          d:[{e:"🚗",l:"voiture"},{e:"🚂",l:"train"}] },
+  { q:"Je roule sur l'eau et je transporte des centaines de personnes.", answer:{e:"🚢",l:"bateau"}, d:[{e:"⛵",l:"voilier"},{e:"🚁",l:"hélicoptère"}] },
+  { q:"Je suis petit, rouge et je transporte des pompiers.", answer:{e:"🚒",l:"camion de pompier"}, d:[{e:"🚗",l:"voiture"},{e:"🚌",l:"bus"}] },
+
+  // Maison & lieux
+  { q:"J'ai un toit, des fenêtres et une porte. Je suis...", answer:{e:"🏠",l:"maison"}, d:[{e:"🏰",l:"château"},{e:"🏢",l:"immeuble"}] },
+  { q:"Les enfants y vont pour apprendre à lire et à compter.", answer:{e:"🏫",l:"école"}, d:[{e:"🏠",l:"maison"},{e:"📚",l:"bibliothèque"}] },
+  { q:"J'ai des toboggans et des balançoires pour s'amuser.", answer:{e:"🛝",l:"toboggan"}, d:[{e:"🎠",l:"manège"},{e:"🏖️",l:"plage"}] },
+  { q:"On vient me voir pour être soigné quand on est malade.", answer:{e:"🏥",l:"hôpital"}, d:[{e:"🏫",l:"école"},{e:"🏦",l:"banque"}] },
+
+  // Jeux & jouets
+  { q:"On m'offre pour les anniversaires et je suis enveloppé de papier.", answer:{e:"🎁",l:"cadeau"}, d:[{e:"🎀",l:"ruban"},{e:"📦",l:"boîte"}] },
+  { q:"Je suis une peluche douce en forme d'ours.", answer:{e:"🧸",l:"nounours"},       d:[{e:"🪆",l:"poupée"},{e:"🎠",l:"manège"}] },
+  { q:"Je monte, je descends au bout d'un fil.", answer:{e:"🪀",l:"yo-yo"},             d:[{e:"🎪",l:"cirque"},{e:"🎭",l:"théâtre"}] },
+  { q:"Je tourne en musique avec des chevaux en bois.", answer:{e:"🎠",l:"manège"},      d:[{e:"🎡",l:"grande roue"},{e:"🛝",l:"toboggan"}] },
+  { q:"On me contrôle avec des boutons pour jouer.", answer:{e:"🎮",l:"jeu vidéo"},     d:[{e:"📱",l:"téléphone"},{e:"💻",l:"ordinateur"}] },
+
+  // Magie & fantaisie
+  { q:"J'ai une corne sur le front et une longue crinière arc-en-ciel.", answer:{e:"🦄",l:"licorne"}, d:[{e:"🐴",l:"cheval"},{e:"🐉",l:"dragon"}] },
+  { q:"Je crache du feu et j'ai de grandes ailes.", answer:{e:"🐉",l:"dragon"},         d:[{e:"🦄",l:"licorne"},{e:"🦁",l:"lion"}] },
+  { q:"J'ai une queue de poisson et je vis dans l'océan.", answer:{e:"🧜",l:"sirène"},   d:[{e:"🐬",l:"dauphin"},{e:"🦋",l:"papillon"}] },
+  { q:"Je porte un chapeau pointu et j'ai une baguette magique.", answer:{e:"🧙",l:"sorcier"}, d:[{e:"🤴",l:"prince"},{e:"👸",l:"princesse"}] },
+  { q:"On la porte sur la tête pour montrer qu'on est roi ou reine.", answer:{e:"👑",l:"couronne"}, d:[{e:"💎",l:"diamant"},{e:"🎩",l:"chapeau"}] },
+
+  // Corps & vêtements
+  { q:"Je protège les pieds quand on court.", answer:{e:"👟",l:"chaussure"},             d:[{e:"🧤",l:"gants"},{e:"🧢",l:"casquette"}] },
+  { q:"On me porte autour du cou quand il fait froid.", answer:{e:"🧣",l:"écharpe"},     d:[{e:"🧤",l:"gants"},{e:"🎩",l:"chapeau"}] },
+  { q:"Je tiens les cheveux pour faire une belle coiffure.", answer:{e:"🪮",l:"brosse à cheveux"}, d:[{e:"✂️",l:"ciseaux"},{e:"🪥",l:"brosse à dents"}] },
+  { q:"On me porte pour voir clairement quand on est myope.", answer:{e:"👓",l:"lunettes"}, d:[{e:"🔭",l:"télescope"},{e:"🔬",l:"microscope"}] },
+
+  // Saisons & météo
+  { q:"Je suis fait de boules de neige empilées avec un chapeau et une carotte.", answer:{e:"⛄",l:"bonhomme de neige"}, d:[{e:"❄️",l:"flocon"},{e:"🌨️",l:"neige"}] },
+  { q:"Je tombe du ciel en hiver et je suis blanc et froid.", answer:{e:"❄️",l:"flocon de neige"}, d:[{e:"⛄",l:"bonhomme de neige"},{e:"🌧️",l:"pluie"}] },
+  { q:"Je tombe du ciel quand les nuages sont gris.", answer:{e:"🌧️",l:"pluie"},        d:[{e:"⛅",l:"nuage"},{e:"❄️",l:"neige"}] },
+  { q:"Je fais peur quand je gronde dans le ciel pendant l'orage.", answer:{e:"⚡",l:"éclair"},   d:[{e:"🌩️",l:"orage"},{e:"💨",l:"vent"}] },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let questions = [];
+let idx = 0;
+let score = 0;
+let wrong = 0;
+let locked = false;
+let fontMode = 'script';
+
+function setFont(mode) {
+  fontMode = mode;
+  document.body.classList.toggle('mode-uppercase', mode === 'uppercase');
+  document.getElementById('btnScript').classList.toggle('active', mode === 'script');
+  document.getElementById('btnMaj').classList.toggle('active', mode === 'uppercase');
+}
+
+function shuffle(a) {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+// ─────────────────────────────────────────────
+// GAME LOGIC
+// ─────────────────────────────────────────────
+function startGame() {
+  questions = shuffle(ALL).slice(0, 100);
+  idx = 0; score = 0; wrong = 0; locked = false;
+  document.getElementById('scoreEl').textContent = 0;
+  document.getElementById('qEl').textContent = 1;
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('progLbl').textContent = '0 / 100';
+  document.getElementById('gameArea').style.display = 'flex';
+  document.getElementById('endScreen').classList.remove('on');
+  renderQ();
+}
+
+function renderQ() {
+  locked = false;
+  const q = questions[idx];
+
+  // Question text
+  const qt = document.getElementById('qText');
+  qt.textContent = q.q;
+
+  // Shuffle choices
+  const choices = shuffle([q.answer, ...q.d]);
+
+  const grid = document.getElementById('imgGrid');
+  grid.innerHTML = '';
+  grid.className = 'images-grid slide-in';
+
+  choices.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'img-btn';
+    btn.innerHTML = `
+      <div class="emoji">${item.e}</div>
+      <div class="emoji-label">${item.l}</div>
+      <div class="badge"></div>
+    `;
+    btn.onclick = () => pick(btn, item, q.answer);
+    grid.appendChild(btn);
+  });
+
+  // Trigger re-animation on question card
+  const card = document.getElementById('qCard');
+  card.classList.remove('slide-in');
+  void card.offsetWidth;
+  card.classList.add('slide-in');
+
+  document.getElementById('qEl').textContent = idx + 1;
+  document.getElementById('progFill').style.width = (idx / 100 * 100) + '%';
+  document.getElementById('progLbl').textContent = idx + ' / 100';
+}
+
+function pick(btn, chosen, correct) {
+  if (locked) return;
+  locked = true;
+
+  const allBtns = document.querySelectorAll('.img-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isOk = chosen.e === correct.e;
+
+  if (isOk) {
+    score++;
+    document.getElementById('scoreEl').textContent = score;
+    btn.classList.add('correct');
+    confetti(12);
+  } else {
+    wrong++;
+    btn.classList.add('wrong');
+    allBtns.forEach(b => {
+      const lbl = b.querySelector('.emoji-label').textContent;
+      if (lbl === correct.l) b.classList.add('reveal');
+    });
+  }
+
+  const delay = isOk ? 950 : 1300;
+  setTimeout(() => {
+    idx++;
+    if (idx >= 100) endGame();
+    else renderQ();
+  }, delay);
+}
+
+function endGame() {
+  document.getElementById('gameArea').style.display = 'none';
+  document.getElementById('progFill').style.width = '100%';
+  document.getElementById('progLbl').textContent = '100 / 100';
+
+  const end = document.getElementById('endScreen');
+  end.classList.add('on');
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('statOk').textContent = score;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statPct').textContent = score + '%';
+
+  let stars, msg;
+  if (score >= 90) {
+    stars = '⭐⭐⭐';
+    msg = 'Incroyable ! Tu es un(e) vrai(e) génie des devinettes ! 🚀';
+  } else if (score >= 70) {
+    stars = '⭐⭐';
+    msg = 'Très bien ! Tu connais plein de choses ! 💪';
+  } else {
+    stars = '⭐';
+    msg = 'Bien essayé ! Recommence pour t\'améliorer !';
+  }
+
+  document.getElementById('endStars').textContent = stars;
+  document.getElementById('endMsg').textContent = msg;
+  confetti(40);
+}
+
+// ─────────────────────────────────────────────
+// CONFETTI
+// ─────────────────────────────────────────────
+function confetti(n) {
+  const c = document.getElementById('cf');
+  const cols = ['#38BDF8','#FBBF24','#FB923C','#A78BFA','#4ADE80','#F87171','#E879F9'];
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const size = 8 + Math.random() * 10;
+    el.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${size}px; height:${size}px;
+      background:${cols[Math.random()*cols.length|0]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-duration:${1.4+Math.random()*1.8}s;
+      animation-delay:${Math.random()*0.4}s;
+    `;
+    c.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ─────────────────────────────────────────────
+startGame();
+</script>
+</body>
+</html>

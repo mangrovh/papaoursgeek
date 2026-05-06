@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jeu des Syllabes 🔤</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap');
+
+  :root {
+    --bg: #F0F7FF;
+    --primary: #3B82F6;
+    --purple: #8B5CF6;
+    --green: #22C55E;
+    --red: #EF4444;
+    --shadow: 0 8px 30px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; top: -120px; right: -120px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed; bottom: -80px; left: -80px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(139,92,246,0.10), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+
+  /* Confetti */
+  .confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+  .confetti-piece {
+    position: absolute; top: -20px; border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Header */
+  header {
+    width: 100%; max-width: 480px;
+    padding: 16px 20px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
+  }
+  .logo { font-family: 'Fredoka One', cursive; font-size: 24px; color: var(--primary); }
+  .score-box { display: flex; gap: 10px; align-items: center; }
+  .score-pill {
+    background: white; border-radius: 30px; padding: 6px 14px;
+    font-weight: 900; font-size: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .score-pill.correct  { color: var(--green); }
+  .score-pill.progress { color: var(--purple); }
+
+  /* Progress */
+  .progress-wrap { width: 100%; max-width: 480px; padding: 0 20px 12px; }
+  .progress-bar  { height: 10px; background: #DBEAFE; border-radius: 10px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--purple));
+    border-radius: 10px; transition: width 0.5s ease;
+  }
+  .progress-label { text-align: right; font-size: 12px; color: #93C5FD; font-weight: 700; margin-top: 4px; }
+
+  /* Settings */
+  .settings-bar { width: 100%; max-width: 480px; padding: 0 20px 14px; display: flex; gap: 10px; }
+  .toggle-btn {
+    flex: 1; padding: 10px;
+    border: 3px solid #DBEAFE; background: white;
+    border-radius: 16px; font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; color: #6B7280;
+  }
+  .toggle-btn.active { border-color: var(--purple); background: #EDE9FE; color: var(--purple); }
+  .toggle-btn:active { transform: scale(0.96); }
+
+  /* Main */
+  main { width: 100%; max-width: 480px; padding: 0 20px 30px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Image card */
+  .image-card {
+    background: white; border-radius: 28px; box-shadow: var(--shadow);
+    overflow: hidden; position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .image-card.correct-anim { animation: cardBounce 0.5s ease; }
+  .image-card.wrong-anim   { animation: cardShake 0.4s ease; }
+  @keyframes cardBounce {
+    0%{transform:scale(1)} 30%{transform:scale(1.04)} 60%{transform:scale(0.98)} 100%{transform:scale(1)}
+  }
+  @keyframes cardShake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
+    60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+  }
+  .image-card-bg { position: absolute; inset: 0; z-index: 0; }
+  .image-emoji {
+    font-size: clamp(100px, 33vw, 140px); line-height: 1; user-select: none;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.13));
+    position: relative; z-index: 1;
+  }
+  .feedback-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 80px; opacity: 0; border-radius: 28px;
+    pointer-events: none; transition: opacity 0.2s; z-index: 2;
+  }
+  .feedback-overlay.show       { opacity: 1; }
+  .feedback-overlay.correct-bg { background: rgba(34,197,94,0.28); }
+  .feedback-overlay.wrong-bg   { background: rgba(239,68,68,0.22); }
+
+  /* Hint */
+  .hint-text {
+    text-align: center; font-size: 14px; font-weight: 800;
+    color: #60A5FA; letter-spacing: 0.3px;
+  }
+
+  /* Word buttons — 1 column, 3 rows */
+  .words-grid { display: flex; flex-direction: column; gap: 11px; }
+
+  .word-btn {
+    background: white;
+    border: 3px solid #DBEAFE;
+    border-radius: 20px;
+    padding: 15px 22px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(22px, 6.5vw, 28px);
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    text-align: left;
+    color: #374151;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    line-height: 1.1;
+  }
+  .word-btn:active:not(:disabled) { transform: scale(0.97); }
+  .word-btn:disabled { cursor: default; }
+
+  /* première syllabe en couleur + légèrement plus grande */
+  .word-btn .syl1 {
+    color: var(--primary);
+    font-size: clamp(26px, 7.8vw, 34px);
+  }
+  .word-btn .syl-rest { color: #6B7280; }
+
+  /* uppercase */
+  .uppercase-mode .word-btn { font-size: clamp(18px, 5.5vw, 24px); letter-spacing: 1.5px; }
+  .uppercase-mode .word-btn .syl1 { font-size: clamp(22px, 6.5vw, 28px); }
+
+  /* States */
+  .word-btn.correct-answer { background: #DCFCE7; border-color: var(--green); transform: scale(1.02); }
+  .word-btn.correct-answer .syl1 { color: #16A34A; }
+  .word-btn.correct-answer .syl-rest { color: #166534; }
+
+  .word-btn.wrong-answer { background: #FEE2E2; border-color: var(--red); animation: wrongWiggle 0.3s ease; }
+  .word-btn.wrong-answer .syl1 { color: #DC2626; }
+  .word-btn.wrong-answer .syl-rest { color: #991B1B; }
+
+  .word-btn.reveal-correct { background: #DCFCE7; border-color: var(--green); }
+  .word-btn.reveal-correct .syl1 { color: #16A34A; }
+  .word-btn.reveal-correct .syl-rest { color: #166534; }
+
+  @keyframes wrongWiggle {
+    0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-2deg)} 75%{transform:rotate(2deg)}
+  }
+
+  /* End screen */
+  .end-screen { display: none; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding: 30px 20px; width: 100%; max-width: 480px; }
+  .end-screen.visible { display: flex; }
+  .end-trophy { font-size: 80px; animation: tropheeBounce 1s ease infinite alternate; }
+  @keyframes tropheeBounce { from{transform:translateY(0) rotate(-5deg)} to{transform:translateY(-10px) rotate(5deg)} }
+  .end-title { font-family: 'Fredoka One', cursive; font-size: 36px; color: var(--primary); }
+  .end-score { font-family: 'Fredoka One', cursive; font-size: 52px; color: var(--purple); }
+  .end-subtitle { font-size: 16px; color: #6B7280; font-weight: 700; }
+  .stars { font-size: 40px; letter-spacing: 8px; }
+  .restart-btn {
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    color: white; border: none; border-radius: 22px; padding: 18px 40px;
+    font-family: 'Fredoka One', cursive; font-size: 22px; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(59,130,246,0.35); transition: all 0.2s;
+  }
+  .restart-btn:active { transform: scale(0.95); }
+</style>
+</head>
+<body>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<header>
+  <div class="logo">🔤 Jeu des Syllabes</div>
+  <div class="score-box">
+    <div class="score-pill correct">✅ <span id="scoreCount">0</span></div>
+    <div class="score-pill progress">🎯 <span id="currentQ">1</span>/100</div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 100</div>
+</div>
+
+<div class="settings-bar">
+  <button class="toggle-btn active" id="btnScript" onclick="setFont('script')">✏️ Script</button>
+  <button class="toggle-btn"        id="btnMaj"    onclick="setFont('uppercase')">🔠 Majuscules</button>
+</div>
+
+<main id="gameArea">
+  <div class="image-card" id="imageCard">
+    <div class="image-card-bg" id="imageBg"></div>
+    <div class="image-emoji"   id="imageEmoji"></div>
+    <div class="feedback-overlay" id="feedbackOverlay"></div>
+  </div>
+  <div class="hint-text">Quel mot commence par la même syllabe ?</div>
+  <div class="words-grid" id="wordsGrid"></div>
+</main>
+
+<div class="end-screen" id="endScreen">
+  <div class="end-trophy">🏆</div>
+  <div class="end-title">Bravo !</div>
+  <div class="stars" id="endStars">⭐⭐⭐</div>
+  <div class="end-score"><span id="finalScore">0</span> / 100</div>
+  <div class="end-subtitle" id="endSubtitle"></div>
+  <button class="restart-btn" onclick="restartGame()">🔄 Rejouer !</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────
+// DATA
+// answer  : { word, syl1 }  — le mot correct (même 1ère syllabe que l'image)
+// distractors : 2 mots dont la syl1 est DIFFÉRENTE entre eux et du answer
+// ─────────────────────────────────────────────────────────────────────
+const ITEMS = [
+  // ── Animaux ──
+  {emoji:"🐱",bg:"#FFF0F5", answer:{word:"chat",      syl1:"cha"},  distractors:[{word:"lapin",    syl1:"la"},  {word:"souris",    syl1:"sou"}]},
+  {emoji:"🐶",bg:"#FFF5E6", answer:{word:"chien",     syl1:"chien"},distractors:[{word:"tigre",    syl1:"ti"},  {word:"renard",    syl1:"re"}]},
+  {emoji:"🐰",bg:"#F0FFF4", answer:{word:"lapin",     syl1:"la"},   distractors:[{word:"chat",     syl1:"cha"}, {word:"souris",    syl1:"sou"}]},
+  {emoji:"🐻",bg:"#FFF8E6", answer:{word:"ours",      syl1:"ours"}, distractors:[{word:"lion",     syl1:"li"},  {word:"renard",    syl1:"re"}]},
+  {emoji:"🦁",bg:"#FFFBEB", answer:{word:"lion",      syl1:"li"},   distractors:[{word:"ours",     syl1:"ours"},{word:"tigre",     syl1:"ti"}]},
+  {emoji:"🐯",bg:"#FFF0E6", answer:{word:"tigre",     syl1:"ti"},   distractors:[{word:"lion",     syl1:"li"},  {word:"renard",    syl1:"re"}]},
+  {emoji:"🐸",bg:"#F0FFF8", answer:{word:"grenouille",syl1:"gre"},  distractors:[{word:"tortue",   syl1:"tor"}, {word:"poussin",   syl1:"pou"}]},
+  {emoji:"🐢",bg:"#F0FFF4", answer:{word:"tortue",    syl1:"tor"},  distractors:[{word:"grenouille",syl1:"gre"},{word:"lézard",    syl1:"lé"}]},
+  {emoji:"🐠",bg:"#E6F8FF", answer:{word:"poisson",   syl1:"poi"},  distractors:[{word:"dauphin",  syl1:"dau"}, {word:"baleine",   syl1:"ba"}]},
+  {emoji:"🐬",bg:"#E6F3FF", answer:{word:"dauphin",   syl1:"dau"},  distractors:[{word:"poisson",  syl1:"poi"}, {word:"requin",    syl1:"re"}]},
+  {emoji:"🦋",bg:"#FFF0FF", answer:{word:"papillon",  syl1:"pa"},   distractors:[{word:"tigre",    syl1:"ti"},  {word:"coccinelle",syl1:"coc"}]},
+  {emoji:"🐝",bg:"#FFFBE6", answer:{word:"abeille",   syl1:"a"},    distractors:[{word:"papillon", syl1:"pa"},  {word:"libellule", syl1:"li"}]},
+  {emoji:"🐦",bg:"#F0F8FF", answer:{word:"oiseau",    syl1:"oi"},   distractors:[{word:"canard",   syl1:"ca"},  {word:"perroquet", syl1:"per"}]},
+  {emoji:"🦆",bg:"#E6FFF8", answer:{word:"canard",    syl1:"ca"},   distractors:[{word:"oiseau",   syl1:"oi"},  {word:"poule",     syl1:"pou"}]},
+  {emoji:"🐔",bg:"#FFFAEF", answer:{word:"poule",     syl1:"pou"},  distractors:[{word:"canard",   syl1:"ca"},  {word:"dinde",     syl1:"din"}]},
+  {emoji:"🦔",bg:"#FFF5E6", answer:{word:"hérisson",  syl1:"hé"},   distractors:[{word:"renard",   syl1:"re"},  {word:"blaireau",  syl1:"blai"}]},
+  {emoji:"🐿️",bg:"#FFF8E6", answer:{word:"écureuil",  syl1:"é"},    distractors:[{word:"lapin",    syl1:"la"},  {word:"blaireau",  syl1:"blai"}]},
+  {emoji:"🦊",bg:"#FFF0E6", answer:{word:"renard",    syl1:"re"},   distractors:[{word:"lapin",    syl1:"la"},  {word:"blaireau",  syl1:"blai"}]},
+  {emoji:"🐺",bg:"#F5F5FF", answer:{word:"loup",      syl1:"loup"}, distractors:[{word:"renard",   syl1:"re"},  {word:"tigre",     syl1:"ti"}]},
+  {emoji:"🦌",bg:"#FFF5E6", answer:{word:"cerf",      syl1:"cerf"}, distractors:[{word:"cheval",   syl1:"che"}, {word:"bison",     syl1:"bi"}]},
+  {emoji:"🐘",bg:"#F5F5F5", answer:{word:"éléphant",  syl1:"é"},    distractors:[{word:"girafe",   syl1:"gi"},  {word:"rhinocéros",syl1:"rhi"}]},
+  {emoji:"🦒",bg:"#FFFDE6", answer:{word:"girafe",    syl1:"gi"},   distractors:[{word:"zèbre",    syl1:"zè"},  {word:"éléphant",  syl1:"é"}]},
+  {emoji:"🐧",bg:"#E6F8FF", answer:{word:"pingouin",  syl1:"pin"},  distractors:[{word:"mouette",  syl1:"mou"}, {word:"cygne",     syl1:"cy"}]},
+  {emoji:"🦜",bg:"#F0FFF0", answer:{word:"perroquet", syl1:"per"},  distractors:[{word:"tourterelle",syl1:"tour"},{word:"moineau",  syl1:"moi"}]},
+  {emoji:"🐊",bg:"#E6FFE8", answer:{word:"crocodile", syl1:"cro"},  distractors:[{word:"lézard",   syl1:"lé"},  {word:"varan",     syl1:"va"}]},
+
+  // ── Fruits ──
+  {emoji:"🍎",bg:"#FFF0F0", answer:{word:"pomme",     syl1:"pom"},  distractors:[{word:"citron",   syl1:"ci"},  {word:"banane",    syl1:"ba"}]},
+  {emoji:"🍊",bg:"#FFF5E6", answer:{word:"orange",    syl1:"o"},    distractors:[{word:"pomme",    syl1:"pom"}, {word:"citron",    syl1:"ci"}]},
+  {emoji:"🍋",bg:"#FFFFE6", answer:{word:"citron",    syl1:"ci"},   distractors:[{word:"pomme",    syl1:"pom"}, {word:"raisin",    syl1:"rai"}]},
+  {emoji:"🍇",bg:"#F5E6FF", answer:{word:"raisin",    syl1:"rai"},  distractors:[{word:"cerise",   syl1:"ce"},  {word:"melon",     syl1:"me"}]},
+  {emoji:"🍓",bg:"#FFE6F0", answer:{word:"fraise",    syl1:"frai"}, distractors:[{word:"cerise",   syl1:"ce"},  {word:"raisin",    syl1:"rai"}]},
+  {emoji:"🍒",bg:"#FFE6F5", answer:{word:"cerise",    syl1:"ce"},   distractors:[{word:"fraise",   syl1:"frai"},{word:"prune",     syl1:"pru"}]},
+  {emoji:"🍌",bg:"#FFFDE6", answer:{word:"banane",    syl1:"ba"},   distractors:[{word:"mangue",   syl1:"man"}, {word:"kiwi",      syl1:"ki"}]},
+  {emoji:"🍍",bg:"#FFFFE6", answer:{word:"ananas",    syl1:"a"},    distractors:[{word:"banane",   syl1:"ba"},  {word:"mangue",    syl1:"man"}]},
+  {emoji:"🍑",bg:"#FFF0E6", answer:{word:"pêche",     syl1:"pê"},   distractors:[{word:"poire",    syl1:"poi"}, {word:"mangue",    syl1:"man"}]},
+  {emoji:"🥝",bg:"#E6FFE6", answer:{word:"kiwi",      syl1:"ki"},   distractors:[{word:"poire",    syl1:"poi"}, {word:"banane",    syl1:"ba"}]},
+
+  // ── Légumes ──
+  {emoji:"🥕",bg:"#FFF0E6", answer:{word:"carotte",   syl1:"ca"},   distractors:[{word:"tomate",   syl1:"to"},  {word:"navet",     syl1:"na"}]},
+  {emoji:"🥦",bg:"#E6FFE6", answer:{word:"brocoli",   syl1:"bro"},  distractors:[{word:"chou",     syl1:"chou"},{word:"salade",    syl1:"sa"}]},
+  {emoji:"🌽",bg:"#FFFDE6", answer:{word:"maïs",      syl1:"maïs"}, distractors:[{word:"navet",    syl1:"na"},  {word:"poireau",   syl1:"poi"}]},
+  {emoji:"🍅",bg:"#FFE6E6", answer:{word:"tomate",    syl1:"to"},   distractors:[{word:"carotte",  syl1:"ca"},  {word:"poivron",   syl1:"poi"}]},
+  {emoji:"🥔",bg:"#FFF8E6", answer:{word:"patate",    syl1:"pa"},   distractors:[{word:"navet",    syl1:"na"},  {word:"oignon",    syl1:"oi"}]},
+  {emoji:"🥒",bg:"#E6FFE8", answer:{word:"concombre", syl1:"con"},  distractors:[{word:"courgette",syl1:"cou"}, {word:"poireau",   syl1:"poi"}]},
+
+  // ── Nourriture ──
+  {emoji:"🎂",bg:"#FFF0FF", answer:{word:"gâteau",    syl1:"gâ"},   distractors:[{word:"tarte",    syl1:"tar"}, {word:"biscuit",   syl1:"bis"}]},
+  {emoji:"🍦",bg:"#FFF5E6", answer:{word:"glace",     syl1:"gla"},  distractors:[{word:"sorbet",   syl1:"sor"}, {word:"yaourt",    syl1:"ya"}]},
+  {emoji:"🍕",bg:"#FFF5E6", answer:{word:"pizza",     syl1:"piz"},  distractors:[{word:"tarte",    syl1:"tar"}, {word:"galette",   syl1:"ga"}]},
+  {emoji:"🥞",bg:"#FFF5E6", answer:{word:"crêpe",     syl1:"crê"},  distractors:[{word:"gaufre",   syl1:"gau"}, {word:"biscuit",   syl1:"bis"}]},
+  {emoji:"🍫",bg:"#F5E6DF", answer:{word:"chocolat",  syl1:"cho"},  distractors:[{word:"caramel",  syl1:"ca"},  {word:"bonbon",    syl1:"bon"}]},
+  {emoji:"🍭",bg:"#FFF0FF", answer:{word:"sucette",   syl1:"su"},   distractors:[{word:"bonbon",   syl1:"bon"}, {word:"caramel",   syl1:"ca"}]},
+  {emoji:"🍬",bg:"#FFE6F5", answer:{word:"bonbon",    syl1:"bon"},  distractors:[{word:"sucette",  syl1:"su"},  {word:"caramel",   syl1:"ca"}]},
+  {emoji:"🥛",bg:"#F8F8FF", answer:{word:"lait",      syl1:"lait"}, distractors:[{word:"jus",      syl1:"jus"}, {word:"soupe",     syl1:"sou"}]},
+  {emoji:"🍳",bg:"#FFFDE6", answer:{word:"omelette",  syl1:"o"},    distractors:[{word:"beurre",   syl1:"beu"}, {word:"fromage",   syl1:"fro"}]},
+  {emoji:"🧀",bg:"#FFFDE6", answer:{word:"fromage",   syl1:"fro"},  distractors:[{word:"beurre",   syl1:"beu"}, {word:"yaourt",    syl1:"ya"}]},
+
+  // ── Objets ──
+  {emoji:"✏️",bg:"#FFFDE6", answer:{word:"crayon",    syl1:"cra"},  distractors:[{word:"stylo",    syl1:"sty"}, {word:"feutre",    syl1:"feu"}]},
+  {emoji:"📖",bg:"#E6F0FF", answer:{word:"livre",     syl1:"li"},   distractors:[{word:"cahier",   syl1:"ca"},  {word:"feuille",   syl1:"feu"}]},
+  {emoji:"🎨",bg:"#F5E6FF", answer:{word:"peinture",  syl1:"pein"}, distractors:[{word:"dessin",   syl1:"des"}, {word:"couleur",   syl1:"cou"}]},
+  {emoji:"⏰",bg:"#F0F8FF", answer:{word:"réveil",    syl1:"ré"},   distractors:[{word:"montre",   syl1:"mon"}, {word:"pendule",   syl1:"pen"}]},
+  {emoji:"💡",bg:"#FFFDE6", answer:{word:"lampe",     syl1:"lam"},  distractors:[{word:"bougie",   syl1:"bou"}, {word:"torche",    syl1:"tor"}]},
+  {emoji:"☂️",bg:"#E6F8FF", answer:{word:"parapluie", syl1:"pa"},   distractors:[{word:"capuche",  syl1:"ca"},  {word:"manteau",   syl1:"man"}]},
+  {emoji:"🔑",bg:"#FFF8E6", answer:{word:"clé",       syl1:"clé"},  distractors:[{word:"serrure",  syl1:"ser"}, {word:"cadenas",   syl1:"ca"}]},
+  {emoji:"🎒",bg:"#FFF5E6", answer:{word:"cartable",  syl1:"car"},  distractors:[{word:"valise",   syl1:"va"},  {word:"sac",       syl1:"sac"}]},
+  {emoji:"🪥",bg:"#EFF6FF", answer:{word:"brosse",    syl1:"bros"}, distractors:[{word:"peigne",   syl1:"pei"}, {word:"savon",     syl1:"sa"}]},
+  {emoji:"🧼",bg:"#F0FFFE", answer:{word:"savon",     syl1:"sa"},   distractors:[{word:"brosse",   syl1:"bros"},{word:"crème",     syl1:"crè"}]},
+
+  // ── Véhicules ──
+  {emoji:"🚗",bg:"#F0F8FF", answer:{word:"voiture",   syl1:"voi"},  distractors:[{word:"camion",   syl1:"ca"},  {word:"moto",      syl1:"mo"}]},
+  {emoji:"🚂",bg:"#E6F5FF", answer:{word:"train",     syl1:"train"},distractors:[{word:"métro",    syl1:"mé"},  {word:"tramway",   syl1:"tram"}]},
+  {emoji:"✈️",bg:"#E6F8FF", answer:{word:"avion",     syl1:"a"},    distractors:[{word:"fusée",    syl1:"fu"},  {word:"planeur",   syl1:"pla"}]},
+  {emoji:"🚀",bg:"#E6E6FF", answer:{word:"fusée",     syl1:"fu"},   distractors:[{word:"avion",    syl1:"a"},   {word:"satellite", syl1:"sa"}]},
+  {emoji:"🚲",bg:"#F0FFE6", answer:{word:"vélo",      syl1:"vé"},   distractors:[{word:"moto",     syl1:"mo"},  {word:"trottinette",syl1:"trot"}]},
+  {emoji:"🚌",bg:"#FFFDE6", answer:{word:"bus",       syl1:"bus"},  distractors:[{word:"camion",   syl1:"ca"},  {word:"tramway",   syl1:"tram"}]},
+  {emoji:"🚁",bg:"#E6FFFE", answer:{word:"hélico",    syl1:"hé"},   distractors:[{word:"avion",    syl1:"a"},   {word:"planeur",   syl1:"pla"}]},
+  {emoji:"⛵",bg:"#E6F8FF", answer:{word:"bateau",    syl1:"ba"},   distractors:[{word:"voilier",  syl1:"voi"}, {word:"péniche",   syl1:"pé"}]},
+  {emoji:"🚒",bg:"#FFE6E6", answer:{word:"camion",    syl1:"ca"},   distractors:[{word:"voiture",  syl1:"voi"}, {word:"moto",      syl1:"mo"}]},
+  {emoji:"🛵",bg:"#F0FFF0", answer:{word:"scooter",   syl1:"scoo"}, distractors:[{word:"moto",     syl1:"mo"},  {word:"vélo",      syl1:"vé"}]},
+
+  // ── Nature & ciel ──
+  {emoji:"⭐",bg:"#FFFDE6", answer:{word:"étoile",    syl1:"é"},    distractors:[{word:"lune",     syl1:"lu"},  {word:"planète",   syl1:"pla"}]},
+  {emoji:"🌙",bg:"#E6E6FF", answer:{word:"lune",      syl1:"lu"},   distractors:[{word:"étoile",   syl1:"é"},   {word:"soleil",    syl1:"so"}]},
+  {emoji:"☀️",bg:"#FFFDE6", answer:{word:"soleil",    syl1:"so"},   distractors:[{word:"lune",     syl1:"lu"},  {word:"planète",   syl1:"pla"}]},
+  {emoji:"🌈",bg:"#FFF0FF", answer:{word:"arc-en-ciel",syl1:"arc"}, distractors:[{word:"nuage",    syl1:"nua"}, {word:"brouillard",syl1:"brouil"}]},
+  {emoji:"☁️",bg:"#F0F8FF", answer:{word:"nuage",     syl1:"nua"},  distractors:[{word:"brume",    syl1:"bru"}, {word:"vent",      syl1:"vent"}]},
+  {emoji:"🌳",bg:"#E6FFE6", answer:{word:"arbre",     syl1:"ar"},   distractors:[{word:"buisson",  syl1:"bui"}, {word:"forêt",     syl1:"fo"}]},
+  {emoji:"🌵",bg:"#E6FFEE", answer:{word:"cactus",    syl1:"cac"},  distractors:[{word:"plante",   syl1:"plan"},{word:"bambou",    syl1:"bam"}]},
+  {emoji:"🌸",bg:"#FFE6F5", answer:{word:"fleur",     syl1:"fleur"},distractors:[{word:"pétale",   syl1:"pé"},  {word:"tige",      syl1:"ti"}]},
+  {emoji:"🌋",bg:"#FFE6E6", answer:{word:"volcan",    syl1:"vol"},  distractors:[{word:"montagne", syl1:"mon"}, {word:"cratère",   syl1:"cra"}]},
+  {emoji:"🏖️",bg:"#E6F8FF", answer:{word:"plage",     syl1:"pla"},  distractors:[{word:"sable",    syl1:"sa"},  {word:"rocher",    syl1:"ro"}]},
+
+  // ── Maison & lieux ──
+  {emoji:"🏠",bg:"#E6F0FF", answer:{word:"maison",    syl1:"mai"},  distractors:[{word:"château",  syl1:"châ"}, {word:"cabane",    syl1:"ca"}]},
+  {emoji:"🏫",bg:"#E6E6FF", answer:{word:"école",     syl1:"é"},    distractors:[{word:"mairie",   syl1:"mai"}, {word:"collège",   syl1:"col"}]},
+  {emoji:"🏥",bg:"#E6FFF8", answer:{word:"hôpital",   syl1:"hô"},   distractors:[{word:"clinique", syl1:"cli"}, {word:"pharmacie", syl1:"phar"}]},
+  {emoji:"🏰",bg:"#F5E6FF", answer:{word:"château",   syl1:"châ"},  distractors:[{word:"donjon",   syl1:"don"}, {word:"rempart",   syl1:"rem"}]},
+
+  // ── Jouets & jeux ──
+  {emoji:"🎁",bg:"#FFE6F5", answer:{word:"cadeau",    syl1:"ca"},   distractors:[{word:"surprise", syl1:"sur"}, {word:"boîte",     syl1:"boi"}]},
+  {emoji:"🧸",bg:"#FFF8E6", answer:{word:"nounours",  syl1:"nou"},  distractors:[{word:"poupée",   syl1:"pou"}, {word:"doudou",    syl1:"dou"}]},
+  {emoji:"🎮",bg:"#E6E6FF", answer:{word:"manette",   syl1:"ma"},   distractors:[{word:"tablette", syl1:"ta"},  {word:"console",   syl1:"con"}]},
+  {emoji:"🎠",bg:"#FFF0FF", answer:{word:"manège",    syl1:"ma"},   distractors:[{word:"toboggan", syl1:"to"},  {word:"balançoire",syl1:"ba"}]},
+  {emoji:"🛝",bg:"#FFF0E6", answer:{word:"toboggan",  syl1:"to"},   distractors:[{word:"balançoire",syl1:"ba"}, {word:"manège",    syl1:"ma"}]},
+  {emoji:"🎈",bg:"#FFE6F0", answer:{word:"ballon",    syl1:"bal"},  distractors:[{word:"cerf-volant",syl1:"cerf"},{word:"bulle",   syl1:"bul"}]},
+  {emoji:"🪀",bg:"#FFE6F5", answer:{word:"yoyo",      syl1:"yo"},   distractors:[{word:"toupie",   syl1:"tou"}, {word:"bille",     syl1:"bi"}]},
+
+  // ── Fantaisie ──
+  {emoji:"🦄",bg:"#FFF0FF", answer:{word:"licorne",   syl1:"li"},   distractors:[{word:"dragon",   syl1:"dra"}, {word:"pégase",    syl1:"pé"}]},
+  {emoji:"🐉",bg:"#E6FFF8", answer:{word:"dragon",    syl1:"dra"},  distractors:[{word:"licorne",  syl1:"li"},  {word:"monstre",   syl1:"mon"}]},
+  {emoji:"👑",bg:"#FFFDE6", answer:{word:"couronne",  syl1:"cou"},  distractors:[{word:"diadème",  syl1:"di"},  {word:"sceptre",   syl1:"scep"}]},
+  {emoji:"💎",bg:"#E6F8FF", answer:{word:"diamant",   syl1:"di"},   distractors:[{word:"rubis",    syl1:"ru"},  {word:"saphir",    syl1:"sa"}]},
+  {emoji:"🧙",bg:"#F5E6FF", answer:{word:"sorcier",   syl1:"sor"},  distractors:[{word:"magicien", syl1:"ma"},  {word:"druide",    syl1:"dru"}]},
+
+  // ── Météo ──
+  {emoji:"⛄",bg:"#F0F8FF", answer:{word:"bonhomme",  syl1:"bon"},  distractors:[{word:"flocon",   syl1:"flo"}, {word:"verglas",   syl1:"ver"}]},
+  {emoji:"❄️",bg:"#E6F8FF", answer:{word:"flocon",    syl1:"flo"},  distractors:[{word:"givre",    syl1:"gi"},  {word:"bonhomme",  syl1:"bon"}]},
+  {emoji:"🌧️",bg:"#E6EEFF", answer:{word:"pluie",     syl1:"plu"},  distractors:[{word:"nuage",    syl1:"nua"}, {word:"tonnerre",  syl1:"ton"}]},
+  {emoji:"⚡",bg:"#FFFDE6", answer:{word:"éclair",    syl1:"é"},    distractors:[{word:"tonnerre", syl1:"ton"}, {word:"grêle",     syl1:"grê"}]},
+  {emoji:"🌪️",bg:"#F0F4FF", answer:{word:"tornade",   syl1:"tor"},  distractors:[{word:"cyclone",  syl1:"cy"},  {word:"rafale",    syl1:"ra"}]},
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let shuffled = [];
+let current  = 0;
+let score    = 0;
+let fontMode = 'script';
+let answered = false;
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Retourne le HTML d'un mot avec syl1 colorée et le reste en gris
+function renderWord(word, syl1, isUppercase) {
+  const cut = syl1.length;
+  let s    = word.slice(0, cut);
+  let rest = word.slice(cut);
+  if (isUppercase) { s = s.toUpperCase(); rest = rest.toUpperCase(); }
+  return `<span class="syl1">${s}</span><span class="syl-rest">${rest}</span>`;
+}
+
+// ─────────────────────────────────────────────
+// GAME
+// ─────────────────────────────────────────────
+function startGame() {
+  shuffled = shuffle(ITEMS).slice(0, 100);
+  current  = 0; score = 0; answered = false;
+  document.getElementById('scoreCount').textContent    = 0;
+  document.getElementById('currentQ').textContent      = 1;
+  document.getElementById('progressFill').style.width  = '0%';
+  document.getElementById('progressLabel').textContent = '0 / 100';
+  document.getElementById('gameArea').style.display    = 'flex';
+  document.getElementById('endScreen').classList.remove('visible');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const item = shuffled[current];
+  const isUp = fontMode === 'uppercase';
+
+  // Image
+  const card    = document.getElementById('imageCard');
+  const overlay = document.getElementById('feedbackOverlay');
+  card.classList.remove('correct-anim', 'wrong-anim');
+  overlay.className   = 'feedback-overlay';
+  overlay.textContent = '';
+  document.getElementById('imageEmoji').textContent   = item.emoji;
+  document.getElementById('imageBg').style.background = item.bg;
+
+  // 3 choices shuffled
+  const choices = shuffle([item.answer, ...item.distractors]);
+  const grid    = document.getElementById('wordsGrid');
+  grid.innerHTML = '';
+  grid.className = 'words-grid' + (isUp ? ' uppercase-mode' : '');
+
+  choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className    = 'word-btn';
+    btn.innerHTML    = renderWord(choice.word, choice.syl1, isUp);
+    btn.dataset.word = choice.word;
+    btn.onclick      = () => handleAnswer(btn, choice.word, item.answer.word);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('currentQ').textContent      = current + 1;
+  document.getElementById('progressFill').style.width  = (current / 100 * 100) + '%';
+  document.getElementById('progressLabel').textContent = current + ' / 100';
+}
+
+function handleAnswer(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+
+  const isCorrect = chosen === correct;
+  const card      = document.getElementById('imageCard');
+  const overlay   = document.getElementById('feedbackOverlay');
+  const allBtns   = document.querySelectorAll('.word-btn');
+
+  allBtns.forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    score++;
+    document.getElementById('scoreCount').textContent = score;
+    btn.classList.add('correct-answer');
+    overlay.textContent = '⭐';
+    overlay.classList.add('show', 'correct-bg');
+    card.classList.add('correct-anim');
+    launchConfetti(8);
+  } else {
+    btn.classList.add('wrong-answer');
+    overlay.textContent = '❌';
+    overlay.classList.add('show', 'wrong-bg');
+    card.classList.add('wrong-anim');
+    allBtns.forEach(b => { if (b.dataset.word === correct) b.classList.add('reveal-correct'); });
+  }
+
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    current++;
+    if (current >= 100) showEndScreen();
+    else renderQuestion();
+  }, isCorrect ? 900 : 1200);
+}
+
+function showEndScreen() {
+  document.getElementById('gameArea').style.display = 'none';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = '100 / 100';
+  const end = document.getElementById('endScreen');
+  end.classList.add('visible');
+  document.getElementById('finalScore').textContent = score;
+  let stars, subtitle;
+  if      (score >= 90) { stars='⭐⭐⭐'; subtitle='Tu es un(e) champion(ne) des syllabes ! 🎉'; }
+  else if (score >= 70) { stars='⭐⭐';   subtitle='Super travail, continue comme ça ! 💪'; }
+  else                  { stars='⭐';     subtitle='Bien essayé, recommence pour t\'améliorer !'; }
+  document.getElementById('endStars').textContent    = stars;
+  document.getElementById('endSubtitle').textContent = subtitle;
+  launchConfetti(30);
+}
+
+function restartGame() { startGame(); }
+
+function setFont(mode) {
+  fontMode = mode;
+  document.getElementById('btnScript').classList.toggle('active', mode === 'script');
+  document.getElementById('btnMaj').classList.toggle('active',    mode === 'uppercase');
+  if (!answered) renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+// CONFETTI
+// ─────────────────────────────────────────────
+function launchConfetti(count) {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#3B82F6','#FBBF24','#06B6D4','#8B5CF6','#22C55E','#F97316','#EC4899'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left              = Math.random() * 100 + '%';
+    el.style.background        = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width             = (8 + Math.random() * 8) + 'px';
+    el.style.height            = (8 + Math.random() * 8) + 'px';
+    el.style.borderRadius      = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay    = (Math.random() * 0.5) + 's';
+    container.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ─────────────────────────────────────────────
+startGame();
+</script>
+</body>
+</html>
