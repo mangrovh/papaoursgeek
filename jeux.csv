@@ -1,6 +1,5 @@
 nom,description,lien
-Jeu des Mots,Trouve le bon mot parmi 3 propositions pour décrire l'image. 100 images adaptées aux enfants dès 4 ans.,jeux/jeu-mots-images.html
-Devine l'image,Une phrase décrit un objet caché : à toi de trouver la bonne image parmi 3. 100 devinettes illustrées.,jeux/jeu-devinettes.html
-Jeu des Syllabes,Écoute bien le mot et retrouve quelle image lui correspond. La première syllabe de chaque mot est mise en valeur.,jeux/jeu-syllabes.html
-Jeu des Paires,Associe 4 mots avec leurs 4 images. Il faut lire attentivement pour ne pas se tromper !,jeux/jeu-paires.html
-Lis bien le mot,Associe 6 mots à leurs images. Les mots commencent 2 par 2 par la même syllabe : impossible de tricher sans lire !,jeux/jeu-paires-syllabes.html
+Jeu des Syllabes (niveau 1),Lis bien le mot et retrouve quelle image lui correspond. La première syllabe de chaque mot est mise en valeur.,jeux/jeu-syllabes.html
+Jeu des Mots (niveau 2),Trouve le bon mot parmi 3 propositions pour décrire l'image. 100 images adaptées aux enfants dès 4 ans.,jeux/jeu-mots-images.html
+Jeu des Paires (niveau 3),Associe 8 mots à leurs images. Les mots commencent 2 par 2 par la même syllabe : impossible de tricher en ne lisant que le début !,jeux/jeu-paires-syllabes.html
+Devine l'image (niveau 4),Une phrase décrit un objet caché : à toi de trouver la bonne image parmi 3. 100 devinettes illustrées.,jeux/jeu-devinettes.html
