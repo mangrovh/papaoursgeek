@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictée CP - Entraînement</title>
+<style>
+  :root{
+    --bleu:#4a90d9; --vert:#45c96a; --orange:#ffa726; --rose:#ff7ba9;
+    --violet:#9b59b6; --fond:#fff7e6; --texte:#333;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:'Comic Sans MS','Chalkboard SE',system-ui,sans-serif;
+    background:var(--fond); color:var(--texte); margin:0; padding:0;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+  }
+  h1{text-align:center; color:var(--violet); margin:20px 10px 5px; font-size:28px;}
+  .subtitle{text-align:center; color:#888; margin:0 0 16px; font-size:15px;}
+  .wrap{width:100%; max-width:900px; padding:0 16px 40px;}
+
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* ---- FONT TOGGLE ---- */
+  .font-toggle{display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 18px; flex-wrap:wrap;}
+  .font-toggle .ft-ico{font-size:22px;}
+  .ft-btn{background:#fff; border:2px solid #ccc; border-radius:20px; padding:8px 18px;
+          font-size:15px; font-weight:bold; cursor:pointer; font-family:inherit;}
+  .ft-btn.active{border-color:var(--violet); background:#f3e8ff; color:var(--violet);}
+
+  /* ---- FONT STYLES ---- */
+  body.cursive .word-box,
+  body.cursive .typed-word,
+  body.cursive .letter-slot,
+  body.cursive .feedback,
+  body.cursive .key,
+  body.cursive .week-btn,
+  body.cursive .listen-btn,
+  body.cursive .word-card .w{ font-family:'Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
+  body.majuscules .word-box,
+  body.majuscules .typed-word,
+  body.majuscules .letter-slot,
+  body.majuscules .feedback,
+  body.majuscules .key,
+  body.majuscules .week-btn,
+  body.majuscules .listen-btn,
+  body.majuscules .word-card .w{ text-transform:uppercase; font-family:'Segoe Print','Comic Sans MS','Chalkboard SE',sans-serif; }
+
+  /* ---- HOME ---- */
+  .mode-select{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:20px;}
+  .mode-card{
+    flex:1 1 190px; background:#fff; border:3px solid var(--bleu); border-radius:20px;
+    padding:16px; text-align:center; cursor:pointer; transition:transform .15s;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+  }
+  .mode-card:active{transform:scale(.95);}
+  .mode-card.sel{border-color:var(--orange); background:#fff8ec;}
+  .mode-card .ico{font-size:40px;}
+  .mode-card .lbl{font-weight:bold; margin-top:6px; font-size:18px; color:var(--bleu);}
+  .mode-card p{font-size:13px; color:#777; margin:6px 0 0;}
+
+  .week-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:10px;}
+  .week-btn{
+    background:#fff; border:3px solid var(--vert); border-radius:16px; padding:14px 6px;
+    font-size:16px; font-weight:bold; color:var(--vert); cursor:pointer; text-align:center;
+    box-shadow:0 3px 8px rgba(0,0,0,.07); transition:transform .1s;
+  }
+  .week-btn:active{transform:scale(.93);}
+  h2.section{color:var(--bleu); margin:26px 0 10px; font-size:20px; text-align:center;}
+
+  /* ---- MODE D'EMPLOI ---- */
+  .howto{margin:0 0 22px; background:#fff; border:3px solid var(--bleu); border-radius:20px; padding:16px 18px; box-shadow:0 3px 10px rgba(0,0,0,.06);}
+  .howto h3{margin:0 0 10px; color:var(--violet); font-size:19px; display:flex; align-items:center; gap:8px;}
+  .howto ol{margin:0; padding-left:20px; font-size:15px; line-height:1.7; color:#555;}
+  .howto ol li b{color:var(--texte);}
+
+  /* ---- LIRE LA LISTE ---- */
+  .read-list{display:flex; flex-direction:column; gap:10px; margin-top:8px;}
+  .word-card{background:#fff; border-radius:16px; padding:16px 20px; box-shadow:0 3px 8px rgba(0,0,0,.06);
+             display:flex; align-items:center; gap:14px; border-left:6px solid var(--violet);}
+  .word-card .num{font-size:14px; color:#999; font-weight:bold; min-width:34px;}
+  .word-card .w{font-size:30px; font-weight:bold; color:var(--texte); flex:1;}
+  .btn-audio{margin-left:auto; background:var(--orange); border:none; color:#fff; border-radius:50%; width:46px; height:46px; font-size:22px; cursor:pointer;}
+  .btn-audio:active{transform:scale(.9);}
+
+  /* ---- GAME ---- */
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;}
+  .btn{background:var(--bleu); color:#fff; border:none; border-radius:14px; padding:12px 16px;
+       font-size:16px; font-weight:bold; cursor:pointer; font-family:inherit;}
+  .btn.grey{background:#bbb;}
+  .btn.green{background:var(--vert);}
+  .btn.orange{background:var(--orange);}
+  .btn:active{transform:scale(.95);}
+
+  .scorebar{display:flex; gap:12px; align-items:center; background:#fff; border-radius:14px;
+            padding:8px 14px; box-shadow:0 2px 6px rgba(0,0,0,.06); font-size:15px;}
+  .scorebar .stars{color:var(--orange); font-size:20px; letter-spacing:2px;}
+  .scorebar .streak{color:var(--rose); font-weight:bold;}
+
+  .word-box{
+    background:#fff; border:3px dashed var(--bleu); border-radius:20px;
+    min-height:80px; display:flex; align-items:center; justify-content:center;
+    font-size:40px; font-weight:bold; text-align:center; padding:12px; margin:10px 0;
+    color:var(--bleu); letter-spacing:3px; flex-wrap:wrap;
+  }
+
+  .letter-slot{
+    display:inline-flex; width:54px; height:64px; margin:4px; border-bottom:4px solid var(--bleu);
+    align-items:center; justify-content:center; font-size:38px; font-weight:bold;
+    background:#f3f8ff; border-radius:8px 8px 0 0;
+  }
+  .letter-slot.blanks{background:#fff3d6; border-bottom-color:var(--orange);}
+  .letter-slot.filled{background:#e8ffe8; border-bottom-color:var(--vert);}
+  .letter-slot.chip{background:#fff; border:2px solid var(--bleu); border-radius:12px;
+                    cursor:pointer; height:56px;}
+  .letter-slot.space{background:transparent; border:none; width:22px;}
+
+  .prompt{text-align:center; font-size:20px; color:#666; margin-bottom:8px;}
+  .listen-btn{
+    display:block; margin:12px auto; background:var(--orange); color:#fff; border:none;
+    border-radius:50%; width:96px; height:96px; font-size:48px; cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+  }
+  .listen-btn:active{transform:scale(.92);}
+
+  .answer-area{display:flex; flex-direction:column; align-items:center; margin:16px 0;}
+  .typed-word{
+    min-height:60px; font-size:38px; letter-spacing:4px; color:var(--texte); text-align:center;
+    border-bottom:4px solid var(--violet); padding:4px 10px; margin-bottom:14px; min-width:200px;
+  }
+
+  .keyboard{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; max-width:640px; margin:0 auto;}
+  .key{
+    width:44px; height:48px; border-radius:10px; border:2px solid #d0d0d0; background:#fff;
+    font-size:22px; font-weight:bold; cursor:pointer; font-family:inherit; color:#444;
+    box-shadow:0 2px 4px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center;
+  }
+  .key:active{background:#eef; transform:scale(.9);}
+  .key.accent{background:#fff0e0; color:var(--orange);}
+  .key.special{width:70px; background:#eee;}
+  .key.back{background:#ffd9d9; color:#c0392b;}
+
+  .feedback{text-align:center; font-size:22px; font-weight:bold; min-height:34px; margin:6px 0;}
+  .feedback.ok{color:var(--vert);}
+  .feedback.ko{color:#e74c3c;}
+
+  .btn-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0;}
+  .next-btn,.giveup-btn{display:none;}
+
+  .progress-dots{display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:8px 0;}
+  .dot{width:20px; height:20px; border-radius:50%; background:#ddd;}
+  .dot.ok{background:var(--vert);}
+  .dot.ko{background:#e74c3c;}
+  .dot.current{outline:3px solid var(--orange);}
+
+  .result-box{text-align:center; background:#fff; border-radius:24px; padding:30px 20px;
+              box-shadow:0 6px 20px rgba(0,0,0,.1); margin-top:10px;}
+  .result-box h2{color:var(--violet);}
+  .result-stars{font-size:56px; color:var(--orange); letter-spacing:6px;}
+  .result-msg{font-size:20px; margin:10px 0;}
+  .result-btn{margin-top:10px; display:block; width:100%; max-width:340px; margin-left:auto; margin-right:auto;}
+
+  #confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:999;}
+  .cf{position:absolute; width:12px; height:12px; border-radius:3px; opacity:.9; animation:fall 2.5s ease-in forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg); opacity:0;}}
+
+  @media(max-width:520px){
+    .word-box{font-size:28px;}
+    .letter-slot{width:40px; height:50px; font-size:28px;}
+    .letter-slot.chip{height:44px;}
+    .key{width:38px; height:44px; font-size:20px;}
+    .key.special{width:56px;}
+    .typed-word{font-size:30px;}
+    .word-card .w{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="wrap">
+
+  <!-- ======= HOME ======= -->
+  <div id="screen-home" class="screen active">
+    <h1>🦉 Dictée CP</h1>
+    <p class="subtitle">Entraîne-toi tout seul !</p>
+
+    <!-- MODE D'EMPLOI -->
+    <div class="howto">
+      <h3>📋 Mode d'emploi</h3>
+      <ol>
+        <li><b>Choisis ton écriture</b> : <em>Cursive minuscule</em> ou <em>Majuscule scripte</em>.</li>
+        <li><b>Lis d'abord la liste</b> des mots de la semaine pour les apprendre.</li>
+        <li><b>Choisis un jeu</b> : 🎧 Dictée, 🔤 Lettres mélangées, ou 🧩 Lettres manquantes.</li>
+        <li><b>Choisis ta semaine</b>, puis entraîne-toi !</li>
+        <li>À la fin, les <b>mots ratés</b> peuvent être <b>rejoués</b> pour les retenir.</li>
+      </ol>
+    </div>
+
+    <div class="font-toggle">
+      <span class="ft-ico">🖊️</span>
+      <button class="ft-btn active" id="font-cursive" onclick="setFont('cursive')">Cursive minuscule</button>
+      <button class="ft-btn" id="font-maj" onclick="setFont('majuscules')">Majuscule scripte</button>
+    </div>
+
+    <div class="mode-select">
+      <div class="mode-card" data-mode="lire">
+        <div class="ico">📖</div>
+        <div class="lbl">Lire la liste</div>
+        <p>Apprends les mots avant de jouer</p>
+      </div>
+      <div class="mode-card sel" data-mode="dictee">
+        <div class="ico">🎧</div>
+        <div class="lbl">Dictée</div>
+        <p>Écoute le mot et écris-le</p>
+      </div>
+      <div class="mode-card" data-mode="ordre">
+        <div class="ico">🔤</div>
+        <div class="lbl">Lettres mélangées</div>
+        <p>Remets les lettres en ordre</p>
+      </div>
+      <div class="mode-card" data-mode="trous">
+        <div class="ico">🧩</div>
+        <div class="lbl">Lettres manquantes</div>
+        <p>Complète le mot</p>
+      </div>
+    </div>
+
+    <h2 class="section">Choisis ta semaine 📅</h2>
+    <div id="week-grid" class="week-grid"></div>
+  </div>
+
+  <!-- ======= LIRE LA LISTE ======= -->
+  <div id="screen-read" class="screen">
+    <div class="topbar">
+      <button class="btn grey" id="btn-read-back">← Accueil</button>
+      <div class="scorebar"><span>📖 Semaine <span id="read-week">1</span></span></div>
+    </div>
+    <p class="prompt">Lis chaque mot, puis appuie sur 🔊 pour l'écouter.</p>
+    <div id="read-list" class="read-list"></div>
+    <div class="btn-row">
+      <button class="btn green" id="btn-read-dictee">🎧 Je suis prêt pour la dictée</button>
+    </div>
+  </div>
+
+  <!-- ======= JEU ======= -->
+  <div id="screen-game" class="screen">
+    <div class="topbar">
+      <button class="btn grey" id="btn-back">← Accueil</button>
+      <div class="scorebar">
+        <span>⭐ <span id="score-stars">0</span>/<span id="score-total">8</span></span>
+        <span class="streak">🔥 <span id="score-streak">0</span></span>
+      </div>
+      <button class="btn orange" id="btn-replay">🔁</button>
+    </div>
+
+    <p class="prompt" id="game-prompt"></p>
+    <div id="word-display" class="word-box"></div>
+    <button class="listen-btn" id="btn-listen">🔊</button>
+
+    <div class="answer-area">
+      <div class="typed-word" id="typed-word"></div>
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="btn-row">
+      <button class="btn orange giveup-btn" id="btn-giveup">🤷 Je ne sais pas</button>
+      <button class="btn green next-btn" id="btn-next">Suivant ▶</button>
+    </div>
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <div class="result-box" id="result-box" style="display:none;">
+      <h2>Bravo ! 🎉</h2>
+      <div class="result-stars" id="result-stars"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <button class="btn orange result-btn" id="btn-retry-failed" style="display:none;"></button>
+      <button class="btn green result-btn" id="btn-retry">🔁 Refaire la semaine</button>
+      <button class="btn grey result-btn" id="btn-home2">🏠 Accueil</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============ DATA : 240 mots (30 semaines x 8) ============ */
+const WORDS = [
+[1,"Anaël"],[1,"lundi"],[1,"mardi"],[1,"mercredi"],[1,"jeudi"],[1,"le"],[1,"la"],[1,"de"],
+[2,"est"],[2,"vendredi"],[2,"samedi"],[2,"dimanche"],[2,"l'école"],[2,"la classe"],[2,"des"],[2,"et"],
+[3,"un/une"],[3,"la vache"],[3,"le cheval"],[3,"le mouton"],[3,"le loup"],[3,"beaucoup"],[3,"bien"],[3,"bientôt"],
+[4,"il y a"],[4,"il/elle"],[4,"dans"],[4,"pour"],[4,"un, une élève"],[4,"la mère"],[4,"combien"],[4,"assez"],
+[5,"c'est"],[5,"les"],[5,"une fille"],[5,"le garçon"],[5,"la porte"],[5,"la balle"],[5,"l'image"],[5,"hier"],
+[6,"son/ses"],[6,"mais"],[6,"avec"],[6,"sage"],[6,"belle, beau"],[6,"le jour"],[6,"la semaine"],[6,"le mois"],
+[7,"chez"],[7,"en"],[7,"une voiture"],[7,"la robe"],[7,"un été"],[7,"le matin"],[7,"le midi"],[7,"sauf"],
+[8,"du"],[8,"non"],[8,"la fête"],[8,"la date"],[8,"la route"],[8,"bon, bonne"],[8,"parce que"],[8,"pourquoi"],
+[9,"bras"],[9,"départ"],[9,"du chocolat"],[9,"du sucre"],[9,"une tartine"],[9,"pour"],[9,"partout"],[9,"quand"],
+[10,"du lait"],[10,"rien"],[10,"balai"],[10,"reine"],[10,"poulet"],[10,"forêt"],[10,"Noël"],[10,"toujours"],
+[11,"souvent"],[11,"maintenant"],[11,"ligne"],[11,"douze"],[11,"tout à coup"],[11,"ma/la/sa"],[11,"mon/ton/son"],[11,"très"],
+[12,"rose"],[12,"trousse"],[12,"en train de"],[12,"avant"],[12,"chaque"],[12,"demain"],[12,"sur/sous"],[12,"aussi"],
+[13,"jusqu'à"],[13,"regard"],[13,"guitare"],[13,"étrange"],[13,"jamais"],[13,"parfois"],[13,"ne pas"],[13,"qui"],
+[14,"jambe"],[14,"enfant"],[14,"où"],[14,"le soir"],[14,"pendant"],[14,"noir, noire"],[14,"plus"],[14,"la confiture"],
+[15,"onze"],[15,"cinq"],[15,"la soupe"],[15,"une pomme"],[15,"une poire"],[15,"du café"],[15,"trop"],[15,"peu"],
+[16,"sans"],[16,"froid"],[16,"point"],[16,"poisson"],[16,"après"],[16,"avant"],[16,"moins"],[16,"falloir"],
+[17,"chaud"],[17,"peau"],[17,"chaussure"],[17,"bateau"],[17,"aucun"],[17,"autour"],[17,"oiseau"],[17,"épaule"],
+[18,"œil"],[18,"maillot"],[18,"cœur"],[18,"portail"],[18,"travailler"],[18,"travail"],[18,"ailleurs"],[18,"sœur"],
+[19,"mienne"],[19,"terre"],[19,"belle"],[19,"adresse"],[19,"tablette"],[19,"brouette"],[19,"maîtresse"],[19,"guerre"],
+[20,"leçon"],[20,"science"],[20,"glace"],[20,"image"],[20,"cerise"],[20,"girafe"],[20,"aller"],[20,"prendre"],
+[21,"cahier"],[21,"nez"],[21,"collier"],[21,"taxi"],[21,"exemple"],[21,"arriver"],[21,"tomber"],[21,"premier"],
+[22,"faim"],[22,"peinture"],[22,"pyjama"],[22,"pain"],[22,"plein"],[22,"lendemain"],[22,"atteindre"],[22,"rallye"],
+[23,"parfum"],[23,"mien"],[23,"album"],[23,"chien"],[23,"examen"],[23,"moyen"],[23,"combien"],[23,"mécanicien"],
+[24,"voyager"],[24,"attention"],[24,"addition"],[24,"crayon"],[24,"situation"],[24,"essayer"],[24,"envoyer"],[24,"soustraction"],
+[25,"aujourd'hui"],[25,"téléphone"],[25,"hibou"],[25,"éléphant"],[25,"homme"],[25,"huit"],[25,"honneur"],[25,"hier"],
+[26,"feuille"],[26,"bille"],[26,"abeille"],[26,"soleil"],[26,"paille"],[26,"briller"],[26,"citrouille"],[26,"grenouille"],
+[27,"août"],[27,"voilà"],[27,"là-bas"],[27,"wagon"],[27,"mais"],[27,"côte"],[27,"déjà"],[27,"aussitôt"],
+[28,"avril"],[28,"donc"],[28,"ours"],[28,"fils"],[28,"parc"],[28,"canal"],[28,"caramel"],[28,"mars"],
+[29,"sept"],[29,"banc"],[29,"beaucoup"],[29,"longtemps"],[29,"voix"],[29,"jamais"],[29,"bruit"],[29,"long"],
+[30,"six"],[30,"soixante"],[30,"dix"],[30,"deuxième"],[30,"second"],[30,"prix"],[30,"animaux"],[30,"vieux"]
+];
+
+/* ============ HELPERS ============ */
+function norm(s){
+  return s.toLowerCase().replace(/’/g,"'").replace(/\s+/g,' ').trim();
+}
+function getVariants(word){
+  if(word.includes('/')) return word.split('/').map(s=>s.trim()).filter(Boolean);
+  if(word.includes(',')){
+    const parts=word.split(',').map(s=>s.trim());
+    const lastParts=parts[parts.length-1].split(' ');
+    if(lastParts.length>1){
+      const tail=lastParts[lastParts.length-1];
+      const heads=parts.map(p=>p.replace(new RegExp(tail+'$'),'').trim());
+      return heads.map(h => h ? h+' '+tail : tail);
+    }
+    return parts;
+  }
+  return [word.trim()];
+}
+
+/* ============ STATE ============ */
+let mode='dictee', week=null;
+let weekWords=[], wordList=[], cur=0, input="", stars=0, streak=0;
+let failed=[], answered=false, displayWord="";
+let targetVariants=[];
+let fontMode='cursive';
+let blankIndices=[], blankPos=0, blankVals={}, trousChars=[];
+
+/* ============ FONT ============ */
+function setFont(f){ fontMode=f; localStorage.setItem('dicteeFont',f); applyFont(); }
+function applyFont(){
+  document.body.classList.toggle('cursive',fontMode==='cursive');
+  document.body.classList.toggle('majuscules',fontMode==='majuscules');
+  document.getElementById('font-cursive').classList.toggle('active',fontMode==='cursive');
+  document.getElementById('font-maj').classList.toggle('active',fontMode==='majuscules');
+}
+
+/* ============ ACCUEIL ============ */
+function buildHome(){
+  const grid=document.getElementById('week-grid');
+  grid.innerHTML='';
+  for(let w=1;w<=30;w++){
+    const b=document.createElement('button');
+    b.className='week-btn'; b.textContent='S'+w;
+    b.onclick=()=>{week=w; chooseWeek();};
+    grid.appendChild(b);
+  }
+}
+document.querySelectorAll('.mode-card').forEach(c=>{
+  c.onclick=()=>{
+    mode=c.dataset.mode;
+    document.querySelectorAll('.mode-card').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel');
+  };
+});
+
+function chooseWeek(){
+  if(mode==='lire'){ openRead(week); return; }
+  startGame();
+}
+
+/* ============ LIRE LA LISTE ============ */
+function openRead(w){
+  document.getElementById('read-week').textContent=w;
+  const list=document.getElementById('read-list');
+  list.innerHTML='';
+  const words=WORDS.filter(x=>x[0]===w).map(x=>x[1]);
+  words.forEach((word,idx)=>{
+    const card=document.createElement('div');
+    card.className='word-card';
+    const vari=getVariants(word)[0];
+    card.innerHTML='<span class="num">'+(idx+1)+'</span><span class="w">'+vari+'</span>';
+    const btn=document.createElement('button');
+    btn.className='btn-audio'; btn.textContent='🔊';
+    btn.onclick=()=>speak(vari);
+    card.appendChild(btn);
+    list.appendChild(card);
+  });
+  show('screen-read'); hide('screen-home');
+}
+document.getElementById('btn-read-back').onclick=goHome;
+document.getElementById('btn-read-dictee').onclick=()=>{ mode='dictee'; startGame(); };
+
+/* ============ JEU ============ */
+function startGame(){
+  weekWords=WORDS.filter(w=>w[0]===week).map(w=>w[1]);
+  wordList=weekWords.slice();
+  cur=0; stars=0; streak=0; failed=[]; input="";
+  show('screen-game'); hide('screen-home'); hide('screen-read');
+  document.getElementById('result-box').style.display='none';
+  document.getElementById('score-total').textContent=wordList.length;
+  updateScore(); loadWord();
+}
+
+function loadWord(){
+  answered=false; input=""; blankPos=0; blankVals={}; blankIndices=[]; trousChars=[];
+  document.getElementById('typed-word').textContent='';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('btn-giveup').style.display='inline-block';
+
+  const word=wordList[cur];
+  targetVariants=getVariants(word);
+  displayWord=targetVariants[0];
+
+  const pmt=document.getElementById('game-prompt');
+  const label = mode==='dictee'?'🎧 Dictée':mode==='ordre'?'🔤 Lettres':'🧩 Complète';
+  pmt.innerHTML='Semaine '+week+' · '+label+' · mot '+(cur+1)+'/'+wordList.length;
+
+  buildDisplay(displayWord);
+  buildKeyboard();
+  buildDots();
+
+  if(mode==='dictee'){ speak(displayWord); }
+}
+
+function buildDisplay(word){
+  const box=document.getElementById('word-display');
+  box.innerHTML=''; box.style.display='flex';
+  const listen=document.getElementById('btn-listen');
+
+  if(mode==='dictee'){
+    box.style.display='none';
+    listen.style.display='block';
+    return;
+  }
+  listen.style.display='block';
+
+  if(mode==='ordre'){
+    const chars=word.split('');
+    const tiles=shuffle(chars.map((c,i)=>({c,i})));
+    tiles.forEach(t=>{
+      const s=document.createElement('span');
+      s.className='letter-slot chip'+(t.c===' '?' space':'');
+      s.textContent = t.c===' ' ? '␣' : t.c;
+      s.onclick=()=>addLetter(t.c);
+      box.appendChild(s);
+    });
+    return;
+  }
+  if(mode==='trous'){
+    trousChars=word.split('');
+    const holes=[];
+    trousChars.forEach((c,i)=>{ if(c!==' ' && Math.random()<0.4) holes.push(i); });
+    if(holes.length===0 && trousChars.length>3) holes.push(Math.floor(trousChars.length/2));
+    blankIndices=holes;
+    trousChars.forEach((c,i)=>{
+      const s=document.createElement('span');
+      if(holes.includes(i) && c!==' '){
+        s.className='letter-slot blanks'; s.textContent='?';
+      } else {
+        s.className='letter-slot'+(c===' '?' space':''); s.textContent=c;
+      }
+      box.appendChild(s);
+    });
+    return;
+  }
+}
+
+function buildKeyboard(){
+  const kb=document.getElementById('keyboard'); kb.innerHTML='';
+  const keys=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+              'é','è','ê','ë','à','â','ç','ô','û','ù','î','ï','œ','\'','-',',',' '];
+  keys.forEach(k=>{
+    const b=document.createElement('button');
+    b.className='key'+(k==='\''||k==='-'||k===','||k===' '?' special':'');
+    if(['é','è','ê','ë','à','â','ç','ô','û','ù','î','ï','œ'].includes(k)) b.className+=' accent';
+    b.textContent = k===' ' ? '␣' : k;
+    b.onclick=()=>addLetter(k);
+    kb.appendChild(b);
+  });
+  const back=document.createElement('button');
+  back.className='key back'; back.textContent='⌫'; back.onclick=backspace;
+  kb.appendChild(back);
+}
+
+/* ============ SAISIE & VALIDATION ============ */
+function addLetter(ch){
+  if(answered) return;
+  if(mode==='trous'){
+    if(blankPos<blankIndices.length){
+      blankVals[blankIndices[blankPos]]=ch;
+      renderTrous(); blankPos++; autoCheck();
+    }
+  } else {
+    input+=ch; renderInput(); autoCheck();
+  }
+}
+function backspace(){
+  if(answered) return;
+  if(mode==='trous'){
+    if(blankPos>0){ blankPos--; delete blankVals[blankIndices[blankPos]]; renderTrous(); }
+  } else {
+    input=input.slice(0,-1); renderInput();
+  }
+}
+function renderInput(){
+  document.getElementById('typed-word').textContent=input;
+}
+function renderTrous(){
+  const box=document.getElementById('word-display');
+  const slots=box.children;
+  blankIndices.forEach((idx,pos)=>{
+    const sl=slots[idx];
+    if(blankVals[idx]){ sl.textContent=blankVals[idx]; sl.classList.remove('blanks'); sl.classList.add('filled'); }
+    else { sl.textContent='?'; }
+  });
+}
+function trousWord(){
+  let s='';
+  for(let i=0;i<trousChars.length;i++){
+    if(blankIndices.includes(i)) s+=blankVals[i]||'';
+    else s+=trousChars[i];
+  }
+  return s;
+}
+function autoCheck(){
+  if(answered) return;
+  const ni = (mode==='trous') ? norm(trousWord()) : norm(input);
+  if(targetVariants.some(v=>norm(v)===ni)){ validate(true); }
+}
+
+function validate(success){
+  if(answered) return;
+  answered=true;
+  const fb=document.getElementById('feedback');
+  document.getElementById('typed-word').textContent=displayWord;
+  if(success){
+    fb.textContent='✅ Bravo !'; fb.className='feedback ok';
+    stars++; streak++; confetti(); dotMark(true);
+  } else {
+    fb.textContent='C\'était : « '+displayWord+' »'; fb.className='feedback ko';
+    streak=0; failed.push(wordList[cur]); dotMark(false);
+  }
+  updateScore();
+  document.getElementById('btn-giveup').style.display='none';
+  document.getElementById('btn-next').style.display='inline-block';
+}
+
+function giveUp(){ validate(false); }
+
+function nextWord(){
+  if(!answered) return;
+  cur++;
+  if(cur<wordList.length) loadWord();
+  else endWeek();
+}
+
+/* ============ FIN / RÉSULTAT ============ */
+function endWeek(){
+  document.getElementById('game-prompt').style.display='none';
+  document.getElementById('word-display').innerHTML='';
+  document.getElementById('keyboard').innerHTML='';
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('btn-giveup').style.display='none';
+  document.getElementById('btn-listen').style.display='none';
+
+  const box=document.getElementById('result-box');
+  box.style.display='block';
+  const total=wordList.length;
+  const st=stars/total;
+  let starsTxt= st>=0.99?'⭐⭐⭐⭐':st>=0.75?'⭐⭐⭐':st>=0.5?'⭐⭐':st>0?'⭐':'';
+  document.getElementById('result-stars').textContent=starsTxt||'💪';
+  document.getElementById('result-msg').textContent=
+    st>=0.99?'Sans faute, incroyable ! 🏆':st>=0.75?'Très beau travail !':st>=0.5?'Bon courage, continue !':'Revois les mots et réessaie !';
+
+  const rf=document.getElementById('btn-retry-failed');
+  if(failed.length>0){
+    rf.style.display='block';
+    rf.textContent='🔁 Rejouer les mots ratés ('+failed.length+')';
+    rf.onclick=()=>{ replayFailed(); };
+  } else { rf.style.display='none'; }
+}
+
+function replayFailed(){
+  wordList=failed.slice(); failed=[]; cur=0; stars=0; streak=0; input="";
+  document.getElementById('result-box').style.display='none';
+  document.getElementById('score-total').textContent=wordList.length;
+  document.getElementById('game-prompt').style.display='block';
+  updateScore(); loadWord();
+}
+
+document.getElementById('btn-retry').onclick=startGame;
+document.getElementById('btn-next').onclick=nextWord;
+document.getElementById('btn-giveup').onclick=giveUp;
+document.getElementById('btn-home2').onclick=goHome;
+document.getElementById('btn-back').onclick=goHome;
+document.getElementById('btn-replay').onclick=()=>{ if(wordList.length) loadWord(); };
+function goHome(){ hide('screen-game'); hide('screen-read'); show('screen-home'); document.getElementById('result-box').style.display='none'; buildHome(); }
+
+/* ============ SCORE / POINTS ============ */
+function updateScore(){
+  document.getElementById('score-stars').textContent=stars;
+  document.getElementById('score-streak').textContent=streak;
+}
+function buildDots(){
+  const d=document.getElementById('progress-dots'); d.innerHTML='';
+  wordList.forEach((_,i)=>{ const el=document.createElement('span'); el.className='dot'+(i===cur?' current':''); d.appendChild(el); });
+}
+function dotMark(ok){
+  const d=document.getElementById('progress-dots').children[cur];
+  if(d){ d.classList.remove('current'); d.classList.add(ok?'ok':'ko'); }
+}
+
+/* ============ CLAVIER PHYSIQUE ============ */
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('screen-game').classList.contains('active')) return;
+  if(e.key==='Backspace'){ backspace(); }
+  else if(e.key.length===1 && /[a-zA-Zàâäéèêëîïôöùûüçœ' ,-]/.test(e.key)){ addLetter(e.key); }
+});
+
+/* ============ AUDIO ============ */
+function speak(text){
+  try{
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='fr-FR'; u.rate=0.85;
+    const voices=speechSynthesis.getVoices();
+    const fr=voices.find(v=>v.lang && v.lang.startsWith('fr'));
+    if(fr) u.voice=fr;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+document.getElementById('btn-listen').onclick=()=>speak(displayWord);
+
+/* ============ CONFETTIS ============ */
+function confetti(){
+  const colors=['#ff7ba9','#ffa726','#45c96a','#4a90d9','#9b59b6'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div'); el.className='cf';
+    el.style.left=Math.random()*100+'vw';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDelay=(Math.random()*0.3)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),2600);
+  }
+}
+
+/* ============ UTIL ============ */
+function show(id){ document.getElementById(id).classList.add('active'); }
+function hide(id){ document.getElementById(id).classList.remove('active'); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ============ INIT ============ */
+try{ fontMode=localStorage.getItem('dicteeFont')||'cursive'; }catch(e){}
+applyFont();
+buildHome();
+</script>
+</body>
+</html>
