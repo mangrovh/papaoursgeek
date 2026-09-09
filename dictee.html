@@ -17,37 +17,41 @@
   .screen{display:none;}
   .screen.active{display:block;}
 
-  .font-toggle{display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 18px; flex-wrap:wrap;}
-  .font-toggle .ft-ico{font-size:22px;}
-  .ft-btn{background:#fff; border:2px solid #ccc; border-radius:20px; padding:8px 18px; font-size:22px; cursor:pointer; font-family:inherit; color:#444;}
+  /* ---- FONT TOGGLE : boutons courts, même ligne ---- */
+  .font-toggle{display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 18px; flex-wrap:nowrap;}
+  .font-toggle .ft-ico{font-size:20px;}
+  .ft-btn{background:#fff; border:2px solid #ccc; border-radius:20px; padding:6px 14px; font-size:18px; cursor:pointer; font-family:inherit; color:#444; flex:1 1 auto; min-width:0; white-space:nowrap;}
   .ft-btn.active{border-color:var(--violet); background:#f3e8ff; color:var(--violet);}
   .ft-btn.ft-cursive{font-family:'Marelle','Segoe Script','Comic Sans MS',cursive;}
   .ft-btn.ft-baton{font-family:'Marelle Baton','Comic Sans MS',system-ui; text-transform:uppercase;}
 
+  /* ---- FONT STYLES ---- */
   body.cursive .word-box, body.cursive .typed-word, body.cursive .letter-slot, body.cursive .feedback,
   body.cursive .week-btn, body.cursive .listen-btn, body.cursive .word-card .w, body.cursive .key{ font-family:'Marelle','Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
   body.majuscules .word-box, body.majuscules .typed-word, body.majuscules .letter-slot, body.majuscules .feedback,
   body.majuscules .week-btn, body.majuscules .listen-btn, body.majuscules .word-card .w, body.majuscules .key{ text-transform:uppercase; font-family:'Marelle Baton','Segoe Print','Comic Sans MS',sans-serif; }
 
-  .mode-select{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:20px;}
-  .mode-card{ flex:1 1 190px; background:#fff; border:3px solid var(--bleu); border-radius:20px; padding:16px; text-align:center; cursor:pointer; transition:transform .15s; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  /* ---- ACTIVITÉS : 2 par ligne sur téléphone ---- */
+  .mode-select{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px;}
+  .mode-card{ flex:1 1 220px; background:#fff; border:3px solid var(--bleu); border-radius:16px; padding:12px; text-align:center; cursor:pointer; transition:transform .15s; box-shadow:0 4px 12px rgba(0,0,0,.08); }
   .mode-card:active{transform:scale(.95);}
   .mode-card.sel{border-color:var(--orange); background:#fff8ec;}
-  .mode-card .ico{font-size:40px;}
-  .mode-card .lbl{font-weight:bold; margin-top:6px; font-size:18px; color:var(--bleu);}
-  .mode-card p{font-size:13px; color:#777; margin:6px 0 0;}
+  .mode-card .ico{font-size:34px;}
+  .mode-card .lbl{font-weight:bold; margin-top:6px; font-size:16px; color:var(--bleu);}
+  .mode-card p{font-size:12px; color:#777; margin:4px 0 0;}
 
-  .week-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:10px;}
-  .week-btn{ background:#fff; border:3px solid var(--vert); border-radius:16px; padding:10px 6px; font-size:16px; font-weight:bold; color:var(--vert); cursor:pointer; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,.07); }
+  /* ---- SEMAINE : juste le numéro ---- */
+  .week-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(56px,1fr)); gap:8px;}
+  .week-btn{ background:#fff; border:3px solid var(--vert); border-radius:14px; padding:10px 4px; font-size:18px; font-weight:bold; color:var(--vert); cursor:pointer; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,.07); }
   .week-btn:active{transform:scale(.93);}
-  .week-btn .best{display:block; font-size:13px; color:var(--orange); margin-top:2px;}
+  .week-btn .best{display:block; font-size:12px; color:var(--orange); margin-top:2px;}
   h2.section{color:var(--bleu); margin:26px 0 10px; font-size:20px; text-align:center;}
 
   .read-list{display:flex; flex-direction:column; gap:10px; margin-top:8px;}
-  .word-card{background:#fff; border-radius:16px; padding:16px 20px; box-shadow:0 3px 8px rgba(0,0,0,.06); display:flex; align-items:center; gap:14px; border-left:6px solid var(--violet);}
-  .word-card .num{font-size:14px; color:#999; font-weight:bold; min-width:34px;}
-  .word-card .w{font-size:28px; font-weight:bold; color:var(--texte); flex:1;}
-  .btn-audio{margin-left:auto; background:var(--orange); border:none; color:#fff; border-radius:50%; width:46px; height:46px; font-size:22px; cursor:pointer;}
+  .word-card{background:#fff; border-radius:16px; padding:14px 18px; box-shadow:0 3px 8px rgba(0,0,0,.06); display:flex; align-items:center; gap:14px; border-left:6px solid var(--violet);}
+  .word-card .num{font-size:14px; color:#999; font-weight:bold; min-width:30px;}
+  .word-card .w{font-size:26px; font-weight:bold; color:var(--texte); flex:1;}
+  .btn-audio{margin-left:auto; background:var(--orange); border:none; color:#fff; border-radius:50%; width:44px; height:44px; font-size:20px; cursor:pointer;}
   .btn-audio:active{transform:scale(.9);}
 
   .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;}
@@ -60,25 +64,26 @@
   .scorebar .streak{color:var(--rose); font-weight:bold;}
 
   .word-box{ background:#fff; border:3px dashed var(--bleu); border-radius:20px; min-height:80px; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; text-align:center; padding:12px; margin:10px 0; color:var(--bleu); letter-spacing:3px; flex-wrap:wrap; }
-  .letter-slot{ display:inline-flex; width:54px; height:64px; margin:4px; border-bottom:4px solid var(--bleu); align-items:center; justify-content:center; font-size:38px; font-weight:bold; background:#f3f8ff; border-radius:8px 8px 0 0; }
+  .letter-slot{ display:inline-flex; width:50px; height:60px; margin:4px; border-bottom:4px solid var(--bleu); align-items:center; justify-content:center; font-size:36px; font-weight:bold; background:#f3f8ff; border-radius:8px 8px 0 0; }
   .letter-slot.blanks{background:#fff3d6; border-bottom-color:var(--orange);}
   .letter-slot.filled{background:#e8ffe8; border-bottom-color:var(--vert);}
-  .letter-slot.chip{background:#fff; border:2px solid var(--bleu); border-radius:12px; cursor:pointer; height:56px;}
-  .letter-slot.space{background:transparent; border:none; width:22px;}
+  .letter-slot.chip{background:#fff; border:2px solid var(--bleu); border-radius:12px; cursor:pointer; height:52px;}
+  .letter-slot.space{background:transparent; border:none; width:20px;}
 
   .prompt{text-align:center; font-size:20px; color:#666; margin-bottom:8px;}
-  .listen-btn{ display:block; margin:12px auto; background:var(--orange); color:#fff; border:none; border-radius:50%; width:96px; height:96px; font-size:48px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.15); }
+  .listen-btn{ display:block; margin:12px auto; background:var(--orange); color:#fff; border:none; border-radius:50%; width:92px; height:92px; font-size:46px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.15); }
   .listen-btn:active{transform:scale(.92);}
 
   .answer-area{display:flex; flex-direction:column; align-items:center; margin:16px 0;}
-  .typed-word{ min-height:60px; font-size:38px; letter-spacing:4px; color:var(--texte); text-align:center; border-bottom:4px solid var(--violet); padding:4px 10px; margin-bottom:14px; min-width:200px; }
+  .typed-word{ min-height:56px; font-size:36px; letter-spacing:4px; color:var(--texte); text-align:center; border-bottom:4px solid var(--violet); padding:4px 10px; margin-bottom:14px; min-width:180px; }
 
-  .keyboard{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; max-width:640px; margin:0 auto;}
-  .key{ width:46px; height:50px; border-radius:10px; border:2px solid #d0d0d0; background:#fff; font-size:24px; font-weight:bold; cursor:pointer; font-family:inherit; color:#444; box-shadow:0 2px 4px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; }
+  .keyboard{display:flex; flex-wrap:wrap; justify-content:center; gap:5px; max-width:640px; margin:0 auto;}
+  .key{ width:44px; height:48px; border-radius:10px; border:2px solid #d0d0d0; background:#fff; font-size:22px; font-weight:bold; cursor:pointer; font-family:'Marelle','Segoe Script','Comic Sans MS',cursive; color:#444; box-shadow:0 2px 4px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; }
   .key:active{background:#eef; transform:scale(.9);}
   .key.accent{background:#fff0e0; color:var(--orange);}
-  .key.special{width:76px; background:#eee;}
+  .key.special{width:70px; background:#eee;}
   .key.back{background:#ffd9d9; color:#c0392b;}
+  body.majuscules .key{ font-family:'Marelle Baton','Segoe Print','Comic Sans MS',sans-serif; text-transform:uppercase; }
 
   .feedback{text-align:center; font-size:22px; font-weight:bold; min-height:34px; margin:6px 0;}
   .feedback.ok{color:var(--vert);} .feedback.ko{color:#e74c3c;}
@@ -96,7 +101,7 @@
   .result-msg{font-size:20px; margin:10px 0;}
   .result-btn{margin-top:10px; display:block; width:100%; max-width:340px; margin-left:auto; margin-right:auto;}
 
-  .help-fab{ position:fixed; right:16px; bottom:16px; z-index:900; width:58px; height:58px; border-radius:50%; border:none; cursor:pointer; background:var(--violet); color:#fff; font-size:26px; box-shadow:0 4px 12px rgba(0,0,0,.25); }
+  .help-fab{ position:fixed; right:16px; bottom:16px; z-index:900; width:56px; height:56px; border-radius:50%; border:none; cursor:pointer; background:var(--violet); color:#fff; font-size:24px; box-shadow:0 4px 12px rgba(0,0,0,.25); }
   .help-fab:active{transform:scale(.92);}
 
   .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:950; align-items:flex-end; justify-content:center;}
@@ -113,8 +118,12 @@
   @keyframes fall{to{transform:translateY(110vh) rotate(720deg); opacity:0;}}
 
   @media(max-width:520px){
-    .word-box{font-size:28px;} .letter-slot{width:40px; height:50px; font-size:28px;} .letter-slot.chip{height:44px;}
-    .key{width:40px; height:46px; font-size:21px;} .key.special{width:60px;} .typed-word{font-size:30px;} .word-card .w{font-size:22px;}
+    .word-box{font-size:26px;} .letter-slot{width:40px; height:48px; font-size:26px;} .letter-slot.chip{height:42px;}
+    .key{width:40px; height:44px; font-size:20px;} .key.special{width:56px;} .typed-word{font-size:28px;} .word-card .w{font-size:22px;}
+    .ft-btn{font-size:16px; padding:5px 10px;}
+    .mode-card{flex:1 1 46%; padding:10px;}
+    .mode-card .ico{font-size:30px;} .mode-card .lbl{font-size:15px;} .mode-card p{font-size:11px;}
+    .week-btn{font-size:16px; padding:8px 2px;}
   }
 </style>
 </head>
@@ -127,7 +136,7 @@
     <button class="modal-close" id="btn-close-help">✕</button>
     <h2>📋 Mode d'emploi</h2>
     <h4>1. Choisir l'écriture</h4>
-    <p><span class="tag">Cursive minuscule</span> → lettres en écriture cursive. <span class="tag">Majuscule scripte</span> → lettres en majuscules. Le choix est mémorisé.</p>
+    <p><span class="tag">Cursive</span> → lettres en écriture cursive. <span class="tag">BATON</span> → lettres en majuscules. Le choix est mémorisé.</p>
     <h4>2. Lire la liste 📖</h4>
     <p>Appuie sur 🔊 pour écouter chaque mot, puis <b>« Je suis prêt pour la dictée »</b>.</p>
     <h4>3. Choisir un jeu</h4>
@@ -158,18 +167,18 @@
 
     <div class="font-toggle">
       <span class="ft-ico">🖊️</span>
-      <button class="ft-btn ft-cursive active" id="font-cursive" onclick="setFont('cursive')">Cursive minuscule</button>
-      <button class="ft-btn ft-baton" id="font-maj" onclick="setFont('majuscules')">Majuscule scripte</button>
+      <button class="ft-btn ft-cursive active" id="font-cursive" onclick="setFont('cursive')">Cursive</button>
+      <button class="ft-btn ft-baton" id="font-maj" onclick="setFont('majuscules')">BATON</button>
     </div>
 
     <div class="mode-select">
-      <div class="mode-card" data-mode="lire"><div class="ico">📖</div><div class="lbl">Lire la liste</div><p>Apprends les mots avant de jouer</p></div>
-      <div class="mode-card sel" data-mode="dictee"><div class="ico">🎧</div><div class="lbl">Dictée</div><p>Écoute le mot et écris-le</p></div>
-      <div class="mode-card" data-mode="ordre"><div class="ico">🔤</div><div class="lbl">Lettres mélangées</div><p>Remets les lettres en ordre</p></div>
+      <div class="mode-card" data-mode="lire"><div class="ico">📖</div><div class="lbl">Lire la liste</div><p>Apprends avant de jouer</p></div>
+      <div class="mode-card sel" data-mode="dictee"><div class="ico">🎧</div><div class="lbl">Dictée</div><p>Écoute et écris</p></div>
+      <div class="mode-card" data-mode="ordre"><div class="ico">🔤</div><div class="lbl">Lettres mélangées</div><p>Remets en ordre</p></div>
       <div class="mode-card" data-mode="trous"><div class="ico">🧩</div><div class="lbl">Lettres manquantes</div><p>Complète le mot</p></div>
     </div>
 
-    <h2 class="section">Choisis ta semaine 📅</h2>
+    <h2 class="section">Semaine 📅</h2>
     <div id="week-grid" class="week-grid"></div>
   </div>
 
@@ -280,7 +289,7 @@ let targetVariants=[];
 let fontMode='cursive';
 let blankIndices=[], blankPos=0, blankVals={}, trousChars=[];
 
-/* ===== VOIX (fiabilisée) ===== */
+/* ---- VOIX ---- */
 let voices=[];
 function loadVoices(){ voices=speechSynthesis.getVoices()||[]; return voices; }
 if('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
@@ -291,7 +300,6 @@ function pickVoice(){
   for(const k of pref){ const v=fr.find(v=>v.name.toLowerCase().includes(k)); if(v) return v; }
   return fr.find(v=>v.default)||fr[0]||null;
 }
-/* Pas de cancel() ici : il annulait la nouvelle lecture sur Chrome. */
 function speak(text){
   try{
     if(!('speechSynthesis' in window)) return;
@@ -303,7 +311,7 @@ function speak(text){
   }catch(e){}
 }
 
-/* ===== PROGRESSION ===== */
+/* ---- PROGRESSION ---- */
 let progress={};
 try{ progress=JSON.parse(localStorage.getItem('dicteeCP'))||{}; }catch(e){ progress={}; }
 function saveProgress(stars){
@@ -315,7 +323,7 @@ function saveProgress(stars){
 }
 function weekBest(w){ let b=0; for(const k in progress){ if(k.startsWith('S'+w+'_')) b=Math.max(b, progress[k].best||0); } return b; }
 
-/* ===== FONT ===== */
+/* ---- FONT ---- */
 function setFont(f){ fontMode=f; localStorage.setItem('dicteeFont',f); applyFont(); }
 function applyFont(){
   document.body.classList.toggle('cursive',fontMode==='cursive');
@@ -324,11 +332,11 @@ function applyFont(){
   document.getElementById('font-maj').classList.toggle('active',fontMode==='majuscules');
 }
 
-/* ===== ACCUEIL ===== */
+/* ---- ACCUEIL (semaine = juste le numéro) ---- */
 function buildHome(){
   const grid=document.getElementById('week-grid'); grid.innerHTML='';
   for(let w=1;w<=30;w++){
-    const b=document.createElement('button'); b.className='week-btn'; b.textContent='S'+w;
+    const b=document.createElement('button'); b.className='week-btn'; b.textContent=w;
     const best=weekBest(w);
     if(best>0){ const sp=document.createElement('span'); sp.className='best'; sp.textContent='⭐'+best+'/8'; b.appendChild(sp); }
     b.onclick=()=>{week=w; chooseWeek();}; grid.appendChild(b);
@@ -339,12 +347,12 @@ document.querySelectorAll('.mode-card').forEach(c=>{
 });
 function chooseWeek(){ if(mode==='lire'){ openRead(week); return; } startGame(); }
 
-/* ===== AIDE ===== */
+/* ---- AIDE ---- */
 document.getElementById('btn-help').onclick=()=>{ document.getElementById('help-modal').classList.add('open'); };
 document.getElementById('btn-close-help').onclick=()=>{ document.getElementById('help-modal').classList.remove('open'); };
 document.getElementById('help-modal').addEventListener('click', e=>{ if(e.target===document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('open'); });
 
-/* ===== LIRE LA LISTE ===== */
+/* ---- LIRE LA LISTE ---- */
 function openRead(w){
   document.getElementById('read-week').textContent=w;
   const list=document.getElementById('read-list'); list.innerHTML='';
@@ -361,7 +369,7 @@ function openRead(w){
 document.getElementById('btn-read-back').onclick=goHome;
 document.getElementById('btn-read-dictee').onclick=()=>{ mode='dictee'; startGame(); };
 
-/* ===== JEU ===== */
+/* ---- JEU ---- */
 function startGame(){
   weekWords=WORDS.filter(w=>w[0]===week).map(w=>w[1]);
   wordList=shuffle(weekWords.slice());// ordre aléatoire
@@ -390,7 +398,7 @@ function loadWord(){
   pmt.innerHTML='Semaine '+week+' · '+label+' · mot '+(cur+1)+'/'+wordList.length;
 
   buildDisplay(displayWord); buildKeyboard(); buildDots();
-  if(mode==='dictee'){ setTimeout(()=>speak(displayWord),60); } // léger délai pour laisser l'UI se rendre
+  if(mode==='dictee'){ setTimeout(()=>speak(displayWord),60); }
 }
 
 function buildDisplay(word){
@@ -439,7 +447,7 @@ function buildKeyboard(){
   const back=document.createElement('button'); back.className='key back'; back.textContent='⌫'; back.onclick=backspace; kb.appendChild(back);
 }
 
-/* ===== SAISIE & VALIDATION ===== */
+/* ---- SAISIE & VALIDATION ---- */
 function addLetter(ch){
   if(answered) return;
   if(mode==='trous'){
@@ -479,7 +487,7 @@ function validate(success){
 function giveUp(){ validate(false); }
 function nextWord(){ if(!answered) return; cur++; if(cur<wordList.length) loadWord(); else endWeek(); }
 
-/* ===== FIN ===== */
+/* ---- FIN ---- */
 function endWeek(){
   document.getElementById('game-prompt').style.display='none';
   document.getElementById('word-display').innerHTML='';
@@ -518,15 +526,14 @@ document.getElementById('btn-back').onclick=goHome;
 document.getElementById('btn-replay').onclick=()=>{ if(wordList.length) loadWord(); };
 function goHome(){ hide('screen-game'); hide('screen-read'); show('screen-home'); document.getElementById('result-box').style.display='none'; buildHome(); }
 
-/* Bouton de lecture de la dictée */
 document.getElementById('btn-listen').onclick=()=>speak(displayWord);
 
-/* ===== SCORE / POINTS ===== */
+/* ---- SCORE / POINTS ---- */
 function updateScore(){ document.getElementById('score-stars').textContent=stars; document.getElementById('score-streak').textContent=streak; }
 function buildDots(){ const d=document.getElementById('progress-dots'); d.innerHTML=''; wordList.forEach((_,i)=>{ const el=document.createElement('span'); el.className='dot'+(i===cur?' current':''); d.appendChild(el); }); }
 function dotMark(ok){ const d=document.getElementById('progress-dots').children[cur]; if(d){ d.classList.remove('current'); d.classList.add(ok?'ok':'ko'); } }
 
-/* ===== CLAVIER PHYSIQUE ===== */
+/* ---- CLAVIER PHYSIQUE ---- */
 document.addEventListener('keydown', e=>{
   if(!document.getElementById('screen-game').classList.contains('active')) return;
   if(document.getElementById('help-modal').classList.contains('open')) return;
@@ -534,7 +541,7 @@ document.addEventListener('keydown', e=>{
   else if(e.key.length===1 && /[a-zA-Zàâäéèêëîïôöùûüçœ' ,-]/.test(e.key)){ addLetter(e.key); }
 });
 
-/* ===== CONFETTIS ===== */
+/* ---- CONFETTIS ---- */
 function confetti(){
   const colors=['#ff7ba9','#ffa726','#45c96a','#4a90d9','#9b59b6'];
   for(let i=0;i<60;i++){
