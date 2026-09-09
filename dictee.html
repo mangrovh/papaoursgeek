@@ -69,12 +69,6 @@
   .week-btn:active{transform:scale(.93);}
   h2.section{color:var(--bleu); margin:26px 0 10px; font-size:20px; text-align:center;}
 
-  /* ---- MODE D'EMPLOI ---- */
-  .howto{margin:0 0 22px; background:#fff; border:3px solid var(--bleu); border-radius:20px; padding:16px 18px; box-shadow:0 3px 10px rgba(0,0,0,.06);}
-  .howto h3{margin:0 0 10px; color:var(--violet); font-size:19px; display:flex; align-items:center; gap:8px;}
-  .howto ol{margin:0; padding-left:20px; font-size:15px; line-height:1.7; color:#555;}
-  .howto ol li b{color:var(--texte);}
-
   /* ---- LIRE LA LISTE ---- */
   .read-list{display:flex; flex-direction:column; gap:10px; margin-top:8px;}
   .word-card{background:#fff; border-radius:16px; padding:16px 20px; box-shadow:0 3px 8px rgba(0,0,0,.06);
@@ -161,6 +155,31 @@
   .result-msg{font-size:20px; margin:10px 0;}
   .result-btn{margin-top:10px; display:block; width:100%; max-width:340px; margin-left:auto; margin-right:auto;}
 
+  /* ---- BOUTON D'AIDE FLOTTANT ---- */
+  .help-fab{
+    position:fixed; right:16px; bottom:16px; z-index:900;
+    width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--violet); color:#fff; font-size:26px; box-shadow:0 4px 12px rgba(0,0,0,.25);
+  }
+  .help-fab:active{transform:scale(.92);}
+
+  /* ---- MODALE D'AIDE ---- */
+  .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:950;
+         align-items:flex-end; justify-content:center;}
+  .modal.open{display:flex;}
+  .modal-box{background:var(--fond); width:100%; max-width:600px; max-height:82vh; overflow-y:auto;
+             border-radius:22px 22px 0 0; padding:18px 20px 26px; position:relative;
+             box-shadow:0 -4px 20px rgba(0,0,0,.2);}
+  .modal-close{position:absolute; top:12px; right:14px; background:#eee; border:none; border-radius:50%;
+               width:40px; height:40px; font-size:20px; cursor:pointer; color:#666;}
+  .modal-close:active{transform:scale(.9);}
+  .modal-box h2{margin:6px 0 14px; color:var(--violet); font-size:24px;}
+  .modal-box h4{margin:18px 0 6px; color:var(--bleu); font-size:18px;}
+  .modal-box p,.modal-box li{font-size:15px; line-height:1.7; color:#555;}
+  .modal-box ul{margin:6px 0; padding-left:20px;}
+  .modal-box .tag{display:inline-block; background:#eef; color:var(--bleu); border-radius:8px;
+                  padding:2px 8px; font-size:13px; font-weight:bold;}
+
   #confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:999;}
   .cf{position:absolute; width:12px; height:12px; border-radius:3px; opacity:.9; animation:fall 2.5s ease-in forwards;}
   @keyframes fall{to{transform:translateY(110vh) rotate(720deg); opacity:0;}}
@@ -179,25 +198,65 @@
 <body>
 
 <canvas id="confetti"></canvas>
+<button class="help-fab" id="btn-help">❓</button>
+
+<!-- MODALE D'AIDE -->
+<div class="modal" id="help-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="btn-close-help">✕</button>
+    <h2>📋 Mode d'emploi</h2>
+
+    <h4>1. Choisir l'écriture</h4>
+    <p>En haut de l'accueil, appuie sur :</p>
+    <ul>
+      <li><span class="tag">Cursive minuscule</span> → les lettres s'affichent en écriture cursive.</li>
+      <li><span class="tag">Majuscule scripte</span> → les lettres s'affichent en majuscules.</li>
+    </ul>
+    <p>Le choix est <b>mémorisé</b> : il reste sélectionné au prochain lancement.</p>
+
+    <h4>2. Lire la liste 📖</h4>
+    <p>Choisis le mode <b>« Lire la liste »</b>, puis une semaine. La liste des 8 mots s'affiche en grand.</p>
+    <ul>
+      <li>Appuie sur <span class="tag">🔊</span> pour <b>écouter</b> chaque mot.</li>
+      <li>Lis-les à voix haute pour les mémoriser.</li>
+      <li>Quand tu es prêt, appuie sur <b>« 🎧 Je suis prêt pour la dictée »</b>.</li>
+    </ul>
+
+    <h4>3. Choisir un jeu</h4>
+    <ul>
+      <li><b>🎧 Dictée</b> : écoute le mot et écris-le au clavier.</li>
+      <li><b>🔤 Lettres mélangées</b> : les lettres sont en désordre, remets-les dans le bon ordre.</li>
+      <li><b>🧩 Lettres manquantes</b> : complète les lettres qui manquent.</li>
+    </ul>
+
+    <h4>4. Pendant le jeu</h4>
+    <ul>
+      <li>Le mot est <b>validé automatiquement</b> dès qu'il est juste → ✅ <b>Bravo !</b></li>
+      <li>Si tu bloques, appuie sur <b>« 🤷 Je ne sais pas »</b> → la réponse s'affiche et le mot compte comme <b>raté</b>.</li>
+      <li>Sur le <b>clavier à l'écran</b>, utilise <span class="tag">␣</span> pour l'espace et <span class="tag">⌫</span> pour effacer.</li>
+      <li>Appuie sur <span class="tag">🔊</span> pour réécouter le mot.</li>
+      <li>Sur ordinateur, tu peux aussi taper directement avec le clavier.</li>
+    </ul>
+
+    <h4>5. Fin de la semaine</h4>
+    <ul>
+      <li>Un écran de <b>résultat</b> s'affiche avec des étoiles : ⭐⭐⭐⭐⭐</li>
+      <li>Si des mots ont été ratés, un bouton <b>« 🔁 Rejouer les mots ratés »</b> apparaît pour t'entraîner encore.</li>
+      <li>Tu peux aussi <b>refaire toute la semaine</b> ou revenir à l'accueil.</li>
+    </ul>
+
+    <h4>💡 Astuce</h4>
+    <p>Commence toujours par <b>📖 Lire la liste</b>, puis fais la <b>🎧 Dictée</b>. Rejoue les mots difficiles à la fin pour bien les retenir !</p>
+  </div>
+</div>
 
 <div class="wrap">
 
-  <!-- ======= HOME ======= -->
+  <!-- ======= ACCUEIL ======= -->
   <div id="screen-home" class="screen active">
     <h1>🦉 Dictée CP</h1>
     <p class="subtitle">Entraîne-toi tout seul !</p>
-
-    <!-- MODE D'EMPLOI -->
-    <div class="howto">
-      <h3>📋 Mode d'emploi</h3>
-      <ol>
-        <li><b>Choisis ton écriture</b> : <em>Cursive minuscule</em> ou <em>Majuscule scripte</em>.</li>
-        <li><b>Lis d'abord la liste</b> des mots de la semaine pour les apprendre.</li>
-        <li><b>Choisis un jeu</b> : 🎧 Dictée, 🔤 Lettres mélangées, ou 🧩 Lettres manquantes.</li>
-        <li><b>Choisis ta semaine</b>, puis entraîne-toi !</li>
-        <li>À la fin, les <b>mots ratés</b> peuvent être <b>rejoués</b> pour les retenir.</li>
-      </ol>
-    </div>
+    <p style="text-align:center; color:var(--bleu); font-size:14px;">Appuie sur le bouton <b>❓</b> en bas à droite pour l'aide.</p>
 
     <div class="font-toggle">
       <span class="ft-ico">🖊️</span>
@@ -378,6 +437,13 @@ function chooseWeek(){
   if(mode==='lire'){ openRead(week); return; }
   startGame();
 }
+
+/* ============ AIDE (MODALE) ============ */
+document.getElementById('btn-help').onclick=()=>{ document.getElementById('help-modal').classList.add('open'); };
+document.getElementById('btn-close-help').onclick=()=>{ document.getElementById('help-modal').classList.remove('open'); };
+document.getElementById('help-modal').addEventListener('click', e=>{
+  if(e.target===document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('open');
+});
 
 /* ============ LIRE LA LISTE ============ */
 function openRead(w){
