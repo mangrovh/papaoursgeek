@@ -46,21 +46,24 @@
 
   /* ---- FONT STYLES ----
      Cursive minuscule => Marelle 2 (cursive scolaire)
-     Majuscule scripte  => Marelle Baton 2 (baton/scripte, en majuscules) */
+     Majuscule scripte  => Marelle Baton 2 (baton/scripte, en majuscules)
+     Le clavier (.key) suit la police choisie. */
   body.cursive .word-box,
   body.cursive .typed-word,
   body.cursive .letter-slot,
   body.cursive .feedback,
   body.cursive .week-btn,
   body.cursive .listen-btn,
-  body.cursive .word-card .w{ font-family:'Marelle','Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
+  body.cursive .word-card .w,
+  body.cursive .key{ font-family:'Marelle','Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
   body.majuscules .word-box,
   body.majuscules .typed-word,
   body.majuscules .letter-slot,
   body.majuscules .feedback,
   body.majuscules .week-btn,
   body.majuscules .listen-btn,
-  body.majuscules .word-card .w{ text-transform:uppercase; font-family:'Marelle Baton','Segoe Print','Comic Sans MS',sans-serif; }
+  body.majuscules .word-card .w,
+  body.majuscules .key{ text-transform:uppercase; font-family:'Marelle Baton','Segoe Print','Comic Sans MS',sans-serif; }
 
   /* ---- HOME ---- */
   .mode-select{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:20px;}
