@@ -5,14 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dictée CP - Entraînement</title>
 <style>
-  /* ---- POLICE CURSIVE SCOLAIRE : MARELLE 2 ---- */
-  /* Le fichier Marelle2-Regular.ttf doit être dans le même dossier que ce fichier. */
+  /* ---- POLICES CURSIVES SCOLAIRES : MARELLE ---- */
+  /* Les fichiers .ttf doivent être dans le même dossier que ce fichier. */
   @font-face{
     font-family:'Marelle';
     src:url('Marelle2-Regular.ttf') format('truetype');
-    font-weight:normal;
-    font-style:normal;
-    font-display:swap;
+    font-weight:normal; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Marelle Baton';
+    src:url('MarelleBaton2-Regular.ttf') format('truetype');
+    font-weight:normal; font-style:normal; font-display:swap;
   }
 
   :root{
@@ -32,21 +35,22 @@
   .screen{display:none;}
   .screen.active{display:block;}
 
-  /* ---- FONT TOGGLE ---- */
+  /* ---- FONT TOGGLE (les boutons = la police qu'ils sélectionnent) ---- */
   .font-toggle{display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 18px; flex-wrap:wrap;}
   .font-toggle .ft-ico{font-size:22px;}
   .ft-btn{background:#fff; border:2px solid #ccc; border-radius:20px; padding:8px 18px;
-          font-size:15px; font-weight:bold; cursor:pointer; font-family:inherit;}
+          font-size:22px; cursor:pointer; font-family:inherit; color:#444;}
   .ft-btn.active{border-color:var(--violet); background:#f3e8ff; color:var(--violet);}
+  .ft-btn.ft-cursive{font-family:'Marelle','Segoe Script','Comic Sans MS',cursive;}
+  .ft-btn.ft-baton{font-family:'Marelle Baton','Comic Sans MS',system-ui; text-transform:uppercase;}
 
   /* ---- FONT STYLES ----
-     Cursive minuscule => police Marelle 2 (cursive scolaire)
-     Majuscule scripte => majuscules en police scripte */
+     Cursive minuscule => Marelle 2 (cursive scolaire)
+     Majuscule scripte  => Marelle Baton 2 (baton/scripte, en majuscules) */
   body.cursive .word-box,
   body.cursive .typed-word,
   body.cursive .letter-slot,
   body.cursive .feedback,
-  body.cursive .key,
   body.cursive .week-btn,
   body.cursive .listen-btn,
   body.cursive .word-card .w{ font-family:'Marelle','Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
@@ -54,10 +58,9 @@
   body.majuscules .typed-word,
   body.majuscules .letter-slot,
   body.majuscules .feedback,
-  body.majuscules .key,
   body.majuscules .week-btn,
   body.majuscules .listen-btn,
-  body.majuscules .word-card .w{ text-transform:uppercase; font-family:'Segoe Print','Comic Sans MS','Chalkboard SE',sans-serif; }
+  body.majuscules .word-card .w{ text-transform:uppercase; font-family:'Marelle Baton','Segoe Print','Comic Sans MS',sans-serif; }
 
   /* ---- HOME ---- */
   .mode-select{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:20px;}
@@ -272,8 +275,8 @@
 
     <div class="font-toggle">
       <span class="ft-ico">🖊️</span>
-      <button class="ft-btn active" id="font-cursive" onclick="setFont('cursive')">Cursive minuscule</button>
-      <button class="ft-btn" id="font-maj" onclick="setFont('majuscules')">Majuscule scripte</button>
+      <button class="ft-btn ft-cursive active" id="font-cursive" onclick="setFont('cursive')">Cursive minuscule</button>
+      <button class="ft-btn ft-baton" id="font-maj" onclick="setFont('majuscules')">Majuscule scripte</button>
     </div>
 
     <div class="mode-select">
@@ -408,6 +411,7 @@ function getVariants(word){
   }
   return [word.trim()];
 }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 
 /* ============ STATE ============ */
 let mode='dictee', week=null;
@@ -482,7 +486,7 @@ document.getElementById('btn-read-dictee').onclick=()=>{ mode='dictee'; startGam
 /* ============ JEU ============ */
 function startGame(){
   weekWords=WORDS.filter(w=>w[0]===week).map(w=>w[1]);
-  wordList=weekWords.slice();
+  wordList=shuffle(weekWords.slice()); // Mots en ordre aléatoire
   cur=0; stars=0; streak=0; failed=[]; input="";
   show('screen-game'); hide('screen-home'); hide('screen-read');
   document.getElementById('result-box').style.display='none';
@@ -672,7 +676,7 @@ function endWeek(){
 }
 
 function replayFailed(){
-  wordList=failed.slice(); failed=[]; cur=0; stars=0; streak=0; input="";
+  wordList=shuffle(failed.slice()); failed=[]; cur=0; stars=0; streak=0; input="";
   document.getElementById('result-box').style.display='none';
   document.getElementById('score-total').textContent=wordList.length;
   document.getElementById('game-prompt').style.display='block';
@@ -737,7 +741,6 @@ function confetti(){
 /* ============ UTIL ============ */
 function show(id){ document.getElementById(id).classList.add('active'); }
 function hide(id){ document.getElementById(id).classList.remove('active'); }
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 
 /* ============ INIT ============ */
 try{ fontMode=localStorage.getItem('dicteeFont')||'cursive'; }catch(e){}
