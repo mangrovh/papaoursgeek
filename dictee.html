@@ -6,7 +6,6 @@
 <title>Dictée CP - Entraînement</title>
 <style>
   /* ---- POLICES CURSIVES SCOLAIRES : MARELLE ---- */
-  /* Les fichiers .ttf doivent être dans le même dossier que ce fichier. */
   @font-face{
     font-family:'Marelle';
     src:url('Marelle2-Regular.ttf') format('truetype');
@@ -35,7 +34,7 @@
   .screen{display:none;}
   .screen.active{display:block;}
 
-  /* ---- FONT TOGGLE (les boutons = la police qu'ils sélectionnent) ---- */
+  /* ---- FONT TOGGLE ---- */
   .font-toggle{display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 18px; flex-wrap:wrap;}
   .font-toggle .ft-ico{font-size:22px;}
   .ft-btn{background:#fff; border:2px solid #ccc; border-radius:20px; padding:8px 18px;
@@ -45,8 +44,8 @@
   .ft-btn.ft-baton{font-family:'Marelle Baton','Comic Sans MS',system-ui; text-transform:uppercase;}
 
   /* ---- FONT STYLES ----
-     Cursive minuscule => Marelle 2 (cursive scolaire)
-     Majuscule scripte  => Marelle Baton 2 (baton/scripte, en majuscules)
+     Cursive minuscule => Marelle 2
+     Majuscule scripte => Marelle Baton 2
      Le clavier (.key) suit la police choisie. */
   body.cursive .word-box,
   body.cursive .typed-word,
@@ -78,13 +77,14 @@
   .mode-card .lbl{font-weight:bold; margin-top:6px; font-size:18px; color:var(--bleu);}
   .mode-card p{font-size:13px; color:#777; margin:6px 0 0;}
 
-  .week-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:10px;}
+  .week-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:10px;}
   .week-btn{
-    background:#fff; border:3px solid var(--vert); border-radius:16px; padding:14px 6px;
+    background:#fff; border:3px solid var(--vert); border-radius:16px; padding:10px 6px;
     font-size:16px; font-weight:bold; color:var(--vert); cursor:pointer; text-align:center;
     box-shadow:0 3px 8px rgba(0,0,0,.07); transition:transform .1s;
   }
   .week-btn:active{transform:scale(.93);}
+  .week-btn .best{display:block; font-size:13px; color:var(--orange); margin-top:2px;}
   h2.section{color:var(--bleu); margin:26px 0 10px; font-size:20px; text-align:center;}
 
   /* ---- LIRE LA LISTE ---- */
@@ -144,13 +144,13 @@
 
   .keyboard{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; max-width:640px; margin:0 auto;}
   .key{
-    width:44px; height:48px; border-radius:10px; border:2px solid #d0d0d0; background:#fff;
-    font-size:22px; font-weight:bold; cursor:pointer; font-family:inherit; color:#444;
+    width:46px; height:50px; border-radius:10px; border:2px solid #d0d0d0; background:#fff;
+    font-size:24px; font-weight:bold; cursor:pointer; font-family:inherit; color:#444;
     box-shadow:0 2px 4px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center;
   }
   .key:active{background:#eef; transform:scale(.9);}
   .key.accent{background:#fff0e0; color:var(--orange);}
-  .key.special{width:70px; background:#eee;}
+  .key.special{width:76px; background:#eee;}
   .key.back{background:#ffd9d9; color:#c0392b;}
 
   .feedback{text-align:center; font-size:22px; font-weight:bold; min-height:34px; margin:6px 0;}
@@ -198,7 +198,6 @@
   .modal-box .tag{display:inline-block; background:#eef; color:var(--bleu); border-radius:8px;
                   padding:2px 8px; font-size:13px; font-weight:bold;}
 
-  #confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:999;}
   .cf{position:absolute; width:12px; height:12px; border-radius:3px; opacity:.9; animation:fall 2.5s ease-in forwards;}
   @keyframes fall{to{transform:translateY(110vh) rotate(720deg); opacity:0;}}
 
@@ -206,8 +205,8 @@
     .word-box{font-size:28px;}
     .letter-slot{width:40px; height:50px; font-size:28px;}
     .letter-slot.chip{height:44px;}
-    .key{width:38px; height:44px; font-size:20px;}
-    .key.special{width:56px;}
+    .key{width:40px; height:46px; font-size:21px;}
+    .key.special{width:60px;}
     .typed-word{font-size:30px;}
     .word-card .w{font-size:24px;}
   }
@@ -215,7 +214,6 @@
 </head>
 <body>
 
-<canvas id="confetti"></canvas>
 <button class="help-fab" id="btn-help">❓</button>
 
 <!-- MODALE D'AIDE -->
@@ -353,6 +351,7 @@
       <h2>Bravo ! 🎉</h2>
       <div class="result-stars" id="result-stars"></div>
       <p class="result-msg" id="result-msg"></p>
+      <p class="result-msg" id="result-best" style="color:var(--bleu);"></p>
       <button class="btn orange result-btn" id="btn-retry-failed" style="display:none;"></button>
       <button class="btn green result-btn" id="btn-retry">🔁 Refaire la semaine</button>
       <button class="btn grey result-btn" id="btn-home2">🏠 Accueil</button>
@@ -419,10 +418,53 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.rando
 /* ============ STATE ============ */
 let mode='dictee', week=null;
 let weekWords=[], wordList=[], cur=0, input="", stars=0, streak=0;
-let failed=[], answered=false, displayWord="";
+let failed=[], answered=false, displayWord="", displayLabel="";
 let targetVariants=[];
 let fontMode='cursive';
 let blankIndices=[], blankPos=0, blankVals={}, trousChars=[];
+
+/* ============ VOIX (préchargement + sélection naturelle) ============ */
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices()||[]; }
+if('speechSynthesis' in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged=loadVoices;
+}
+function pickVoice(){
+  if(!voices.length) loadVoices();
+  const fr=voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('fr'));
+  const preferred=['google','natural','neural','siri','denise','julie','amelie','thomas','audrey','siri'];
+  for(const kw of preferred){
+    const v=fr.find(v=>v.name.toLowerCase().includes(kw));
+    if(v) return v;
+  }
+  return fr.find(v=>v.default)||fr[0]||null;
+}
+function speak(text){
+  try{
+    if(!('speechSynthesis' in window)) return;
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='fr-FR'; u.rate=0.85; u.pitch=1.0;
+    const v=pickVoice(); if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ============ PROGRESSION (localStorage) ============ */
+let progress={};
+try{ progress=JSON.parse(localStorage.getItem('dicteeCP'))||{}; }catch(e){ progress={}; }
+function saveProgress(stars, total){
+  const key='S'+week+'_'+mode;
+  const prev=progress[key]||{best:0};
+  if(stars>prev.best) prev.best=stars;
+  progress[key]=prev;
+  try{ localStorage.setItem('dicteeCP',JSON.stringify(progress)); }catch(e){}
+}
+function weekBest(w){
+  let b=0;
+  for(const k in progress){ if(k.startsWith('S'+w+'_')) b=Math.max(b, progress[k].best||0); }
+  return b;
+}
 
 /* ============ FONT ============ */
 function setFont(f){ fontMode=f; localStorage.setItem('dicteeFont',f); applyFont(); }
@@ -440,6 +482,12 @@ function buildHome(){
   for(let w=1;w<=30;w++){
     const b=document.createElement('button');
     b.className='week-btn'; b.textContent='S'+w;
+    const best=weekBest(w);
+    if(best>0){
+      const sp=document.createElement('span');
+      sp.className='best'; sp.textContent='⭐'+best+'/8';
+      b.appendChild(sp);
+    }
     b.onclick=()=>{week=w; chooseWeek();};
     grid.appendChild(b);
   }
@@ -473,11 +521,12 @@ function openRead(w){
   words.forEach((word,idx)=>{
     const card=document.createElement('div');
     card.className='word-card';
-    const vari=getVariants(word)[0];
-    card.innerHTML='<span class="num">'+(idx+1)+'</span><span class="w">'+vari+'</span>';
+    const vari=getVariants(word);
+    const label=vari.join(' / ');
+    card.innerHTML='<span class="num">'+(idx+1)+'</span><span class="w">'+label+'</span>';
     const btn=document.createElement('button');
     btn.className='btn-audio'; btn.textContent='🔊';
-    btn.onclick=()=>speak(vari);
+    btn.onclick=()=>speak(vari[0]);
     card.appendChild(btn);
     list.appendChild(card);
   });
@@ -489,7 +538,7 @@ document.getElementById('btn-read-dictee').onclick=()=>{ mode='dictee'; startGam
 /* ============ JEU ============ */
 function startGame(){
   weekWords=WORDS.filter(w=>w[0]===week).map(w=>w[1]);
-  wordList=shuffle(weekWords.slice()); // Mots en ordre aléatoire
+  wordList=shuffle(weekWords.slice()); // ordre aléatoire
   cur=0; stars=0; streak=0; failed=[]; input="";
   show('screen-game'); hide('screen-home'); hide('screen-read');
   document.getElementById('result-box').style.display='none';
@@ -507,7 +556,8 @@ function loadWord(){
 
   const word=wordList[cur];
   targetVariants=getVariants(word);
-  displayWord=targetVariants[0];
+  displayWord=targetVariants[0];       // pour la synthèse vocale
+  displayLabel=targetVariants.join(' / '); // pour l'affichage
 
   const pmt=document.getElementById('game-prompt');
   const label = mode==='dictee'?'🎧 Dictée':mode==='ordre'?'🔤 Lettres':'🧩 Complète';
@@ -546,9 +596,20 @@ function buildDisplay(word){
   }
   if(mode==='trous'){
     trousChars=word.split('');
+    const nonSpace=[];
+    trousChars.forEach((c,i)=>{ if(c!==' ') nonSpace.push(i); });
+    const len=nonSpace.length;
+    let holeCount;
+    if(len<=2) holeCount = len>1 ? 1 : 0;
+    else holeCount = Math.max(1, Math.min(Math.round(len*0.35), len-1));
+    if(holeCount>nonSpace.length) holeCount=nonSpace.length;
+    console.log('word',word,'len',len,'holes',holeCount);
+    const pool=nonSpace.slice();
     const holes=[];
-    trousChars.forEach((c,i)=>{ if(c!==' ' && Math.random()<0.4) holes.push(i); });
-    if(holes.length===0 && trousChars.length>3) holes.push(Math.floor(trousChars.length/2));
+    for(let h=0;h<holeCount;h++){
+      const idx=Math.floor(Math.random()*pool.length);
+      holes.push(pool.splice(idx,1)[0]);
+    }
     blankIndices=holes;
     trousChars.forEach((c,i)=>{
       const s=document.createElement('span');
@@ -630,12 +691,12 @@ function validate(success){
   if(answered) return;
   answered=true;
   const fb=document.getElementById('feedback');
-  document.getElementById('typed-word').textContent=displayWord;
+  document.getElementById('typed-word').textContent=displayLabel;
   if(success){
     fb.textContent='✅ Bravo !'; fb.className='feedback ok';
     stars++; streak++; confetti(); dotMark(true);
   } else {
-    fb.textContent='C\'était : « '+displayWord+' »'; fb.className='feedback ko';
+    fb.textContent='C\'était : « '+displayLabel+' »'; fb.className='feedback ko';
     streak=0; failed.push(wordList[cur]); dotMark(false);
   }
   updateScore();
@@ -669,6 +730,11 @@ function endWeek(){
   document.getElementById('result-stars').textContent=starsTxt||'💪';
   document.getElementById('result-msg').textContent=
     st>=0.99?'Sans faute, incroyable ! 🏆':st>=0.75?'Très beau travail !':st>=0.5?'Bon courage, continue !':'Revois les mots et réessaie !';
+
+  // Sauvegarde + meilleur score
+  saveProgress(stars, total);
+  const best=weekBest(week);
+  document.getElementById('result-best').textContent='Meilleur score de la semaine (tous jeux) : ⭐'+best+'/'+total;
 
   const rf=document.getElementById('btn-retry-failed');
   if(failed.length>0){
@@ -708,27 +774,15 @@ function dotMark(ok){
   if(d){ d.classList.remove('current'); d.classList.add(ok?'ok':'ko'); }
 }
 
-/* ============ CLAVIER PHYSIQUE ============ */
+/* ============ CLAVIER PHYSIQUE (bloqué si aide ouverte) ============ */
 document.addEventListener('keydown', e=>{
   if(!document.getElementById('screen-game').classList.contains('active')) return;
-  if(e.key==='Backspace'){ backspace(); }
+  if(document.getElementById('help-modal').classList.contains('open')) return;
+  if(e.key==='Backspace'){ backspace(); e.preventDefault(); }
   else if(e.key.length===1 && /[a-zA-Zàâäéèêëîïôöùûüçœ' ,-]/.test(e.key)){ addLetter(e.key); }
 });
 
-/* ============ AUDIO ============ */
-function speak(text){
-  try{
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang='fr-FR'; u.rate=0.85;
-    const voices=speechSynthesis.getVoices();
-    const fr=voices.find(v=>v.lang && v.lang.startsWith('fr'));
-    if(fr) u.voice=fr;
-    speechSynthesis.speak(u);
-  }catch(e){}
-}
-document.getElementById('btn-listen').onclick=()=>speak(displayWord);
-
-/* ============ CONFETTIS ============ */
+/* ============ CONFETTIS (div, plus de canvas) ============ */
 function confetti(){
   const colors=['#ff7ba9','#ffa726','#45c96a','#4a90d9','#9b59b6'];
   for(let i=0;i<60;i++){
