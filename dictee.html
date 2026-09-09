@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dictée CP - Entraînement</title>
 <style>
+  /* ---- POLICE CURSIVE SCOLAIRE : MARELLE 2 ---- */
+  /* Le fichier Marelle2-Regular.ttf doit être dans le même dossier que ce fichier. */
+  @font-face{
+    font-family:'Marelle';
+    src:url('Marelle2-Regular.ttf') format('truetype');
+    font-weight:normal;
+    font-style:normal;
+    font-display:swap;
+  }
+
   :root{
     --bleu:#4a90d9; --vert:#45c96a; --orange:#ffa726; --rose:#ff7ba9;
     --violet:#9b59b6; --fond:#fff7e6; --texte:#333;
@@ -29,7 +39,9 @@
           font-size:15px; font-weight:bold; cursor:pointer; font-family:inherit;}
   .ft-btn.active{border-color:var(--violet); background:#f3e8ff; color:var(--violet);}
 
-  /* ---- FONT STYLES ---- */
+  /* ---- FONT STYLES ----
+     Cursive minuscule => police Marelle 2 (cursive scolaire)
+     Majuscule scripte => majuscules en police scripte */
   body.cursive .word-box,
   body.cursive .typed-word,
   body.cursive .letter-slot,
@@ -37,7 +49,7 @@
   body.cursive .key,
   body.cursive .week-btn,
   body.cursive .listen-btn,
-  body.cursive .word-card .w{ font-family:'Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
+  body.cursive .word-card .w{ font-family:'Marelle','Segoe Script','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive; }
   body.majuscules .word-box,
   body.majuscules .typed-word,
   body.majuscules .letter-slot,
