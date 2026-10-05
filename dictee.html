@@ -434,7 +434,7 @@ function buildDisplay(word){
     if(holeCount>nonSpace.length) holeCount=nonSpace.length;
     const pool=nonSpace.slice(); const holes=[];
     for(let h=0;h<holeCount;h++){ const idx=Math.floor(Math.random()*pool.length); holes.push(pool.splice(idx,1)[0]); }
-    blankIndices=holes;
+    blankIndices=holes.sort((a,b)=>a-b); // trous de gauche à droite : on complète dans l'ordre de lecture
     trousChars.forEach((c,i)=>{
       const s=document.createElement('span');
       if(holes.includes(i) && c!==' '){ s.className='letter-slot blanks'; s.textContent='?'; }
@@ -475,7 +475,7 @@ function renderTrous(){
   const slots=document.getElementById('word-display').children;
   blankIndices.forEach((idx,pos)=>{ const sl=slots[idx];
     if(blankVals[idx]){ sl.textContent=blankVals[idx]; sl.classList.remove('blanks'); sl.classList.add('filled'); }
-    else { sl.textContent='?'; } });
+    else { sl.textContent='?'; sl.classList.remove('filled'); sl.classList.add('blanks'); } });
 }
 function trousWord(){ let s=''; for(let i=0;i<trousChars.length;i++){ if(blankIndices.includes(i)) s+=blankVals[i]||''; else s+=trousChars[i]; } return s; }
 function autoCheck(){
